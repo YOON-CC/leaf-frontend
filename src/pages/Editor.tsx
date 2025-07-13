@@ -17,12 +17,7 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
-type LayoutHierarchy = {
-  [layoutId: string]: {
-    layout: fabric.Object; // layout 오브젝트 자체
-    children: fabric.Object[]; // 자식 도형 목록
-  };
-};
+
 export default function Editor() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricCanvas = useRef<fabric.Canvas | null>(null);
@@ -90,7 +85,7 @@ export default function Editor() {
 
       isIntersectingRef.current = intersecting;
       layoutObjectRef.current = collidedLayout;
-      // movingObjectRef.current =
+      movingObjectRef.current = movingObj;
 
       fabricCanvas.current?.renderAll();
     });
@@ -122,6 +117,7 @@ export default function Editor() {
     movingObject: fabric.Object | null
   ) => {
     console.log("도형이 레이아웃에 들어왔습니다.", layoutObject, movingObject);
+
     // if (movingObj && layout) {
     //   console.log("도형:", movingObj);
     //   console.log("레이아웃:", layout);
