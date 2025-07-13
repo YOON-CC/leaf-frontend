@@ -16,7 +16,13 @@ import {
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
-
+import { v4 as uuidv4 } from "uuid";
+type LayoutHierarchy = {
+  [layoutId: string]: {
+    layout: fabric.Object; // layout 오브젝트 자체
+    children: fabric.Object[]; // 자식 도형 목록
+  };
+};
 export default function Editor() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricCanvas = useRef<fabric.Canvas | null>(null);
@@ -34,13 +40,18 @@ export default function Editor() {
     scaleY: 1,
   });
 
+  // 충돌 중인지 저장하는 ref (렌더링과 무관하게 상태 저장용)
+  const isIntersectingRef = useRef(false);
+  const layoutObjectRef = useRef<fabric.Object | null>(null);
+  const movingObjectRef = useRef<fabric.Object | null>(null);
+
   useEffect(() => {
     if (!canvasRef.current) return;
 
     fabricCanvas.current = new fabric.Canvas(canvasRef.current, {
       backgroundColor: "#ffffff",
-      width: 800,
-      height: 600,
+      width: 1200,
+      height: 800,
     });
 
     fabricCanvas.current.on("selection:created", (e) => {
@@ -63,17 +74,40 @@ export default function Editor() {
       const movingObj = e.target;
       if (!movingObj) return;
 
+      let intersecting = false;
+      let collidedLayout: fabric.Object | null = null;
+
       layoutListRef.current.forEach((layout) => {
         if (movingObj === layout) return; // 자기 자신 제외
-
         if (movingObj.intersectsWithObject(layout)) {
           layout.set("fill", "rgba(255,0,0,0.2)"); // 빨강으로 변경
-          fabricCanvas.current?.renderAll();
+          intersecting = true;
+          collidedLayout = layout; // 충돌한 layout 저장
         } else {
-          layout.set("fill", "rgba(0, 145, 255, 0.1)"); // 원래 색으로 복구
-          fabricCanvas.current?.renderAll();
+          layout.set("fill", "rgba(0, 145, 255, 0.1)");
         }
       });
+
+      isIntersectingRef.current = intersecting;
+      layoutObjectRef.current = collidedLayout;
+      // movingObjectRef.current =
+
+      fabricCanvas.current?.renderAll();
+    });
+
+    fabricCanvas.current.on("object:modified", () => {
+      if (isIntersectingRef.current) {
+        creatingRelationShip(layoutObjectRef.current, movingObjectRef.current);
+
+        // layout 색상 원래대로 복구
+        layoutListRef.current.forEach((layout) => {
+          layout.set("fill", "rgba(0, 145, 255, 0.1)");
+        });
+
+        fabricCanvas.current?.renderAll();
+      }
+      isIntersectingRef.current = false;
+      movingObjectRef.current = null;
     });
 
     return () => {
@@ -81,6 +115,20 @@ export default function Editor() {
       fabricCanvas.current = null;
     };
   }, []);
+
+  // 계층관계 생성
+  const creatingRelationShip = (
+    layoutObject: fabric.Object | null,
+    movingObject: fabric.Object | null
+  ) => {
+    console.log("도형이 레이아웃에 들어왔습니다.", layoutObject, movingObject);
+    // if (movingObj && layout) {
+    //   console.log("도형:", movingObj);
+    //   console.log("레이아웃:", layout);
+    // } else {
+    //   console.log("충돌 정보가 없습니다.");
+    // }
+  };
 
   const updatePropertiesFromObject = (obj: fabric.Object) => {
     setObjectProperties({
@@ -103,7 +151,7 @@ export default function Editor() {
     switch (type) {
       case "layout": {
         const layout = new fabric.Rect({
-          width: 100,
+          width: 400,
           height: 60,
           fill: "rgba(0, 145, 255, 0.1)",
           left: 100,
@@ -111,8 +159,8 @@ export default function Editor() {
           strokeDashArray: [5, 5],
           strokeUniform: true,
         });
-
-        layoutListRef.current.push(layout); // 배열에 추가
+        layout.set("customId", uuidv4()); // UUID 추가
+        layoutListRef.current.push(layout);
         shape = layout;
         break;
       }
@@ -124,7 +172,9 @@ export default function Editor() {
           left: 100,
           top: 100,
         });
+        shape.set("customId", uuidv4());
         break;
+
       case "rectangle":
         shape = new fabric.Rect({
           width: 100,
@@ -133,7 +183,9 @@ export default function Editor() {
           left: 100,
           top: 100,
         });
+        shape.set("customId", uuidv4());
         break;
+
       case "triangle":
         shape = new fabric.Triangle({
           width: 100,
@@ -142,7 +194,9 @@ export default function Editor() {
           left: 100,
           top: 100,
         });
+        shape.set("customId", uuidv4());
         break;
+
       case "text":
         shape = new fabric.Text("텍스트", {
           left: 100,
@@ -150,7 +204,9 @@ export default function Editor() {
           fontSize: 24,
           fill: "#1f2937",
         });
+        shape.set("customId", uuidv4());
         break;
+
       default:
         return;
     }
