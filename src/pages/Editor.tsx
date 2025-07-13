@@ -37,14 +37,12 @@ export default function Editor() {
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    // fabric 캔버스 생성
     fabricCanvas.current = new fabric.Canvas(canvasRef.current, {
       backgroundColor: "#ffffff",
       width: 800,
       height: 600,
     });
 
-    // 객체 선택 이벤트 리스너
     fabricCanvas.current.on("selection:created", (e) => {
       const selected = e.selected[0];
       setSelectedObject(selected);
@@ -59,6 +57,23 @@ export default function Editor() {
 
     fabricCanvas.current.on("selection:cleared", () => {
       setSelectedObject(null);
+    });
+
+    fabricCanvas.current.on("object:moving", (e) => {
+      const movingObj = e.target;
+      if (!movingObj) return;
+
+      layoutListRef.current.forEach((layout) => {
+        if (movingObj === layout) return; // 자기 자신 제외
+
+        if (movingObj.intersectsWithObject(layout)) {
+          layout.set("fill", "rgba(255,0,0,0.2)"); // 빨강으로 변경
+          fabricCanvas.current?.renderAll();
+        } else {
+          layout.set("fill", "rgba(0, 145, 255, 0.1)"); // 원래 색으로 복구
+          fabricCanvas.current?.renderAll();
+        }
+      });
     });
 
     return () => {
@@ -78,6 +93,7 @@ export default function Editor() {
       scaleY: obj.scaleY || 1,
     });
   };
+  const layoutListRef = useRef<fabric.Rect[]>([]);
 
   const addShape = (type: string) => {
     if (!fabricCanvas.current) return;
@@ -85,6 +101,22 @@ export default function Editor() {
     let shape: fabric.Object;
 
     switch (type) {
+      case "layout": {
+        const layout = new fabric.Rect({
+          width: 100,
+          height: 60,
+          fill: "rgba(0, 145, 255, 0.1)",
+          left: 100,
+          top: 100,
+          strokeDashArray: [5, 5],
+          strokeUniform: true,
+        });
+
+        layoutListRef.current.push(layout); // 배열에 추가
+        shape = layout;
+        break;
+      }
+
       case "circle":
         shape = new fabric.Circle({
           radius: 50,
@@ -172,7 +204,14 @@ export default function Editor() {
                 <Save size={14} />
                 <span>Save</span>
               </button>
-              <button className="px-3 py-1.5 bg-gray-700 text-gray-200 rounded-md hover:bg-gray-600 transition-colors text-sm flex items-center space-x-1">
+              <button
+                onClick={() => {
+                  if (!fabricCanvas.current) return;
+                  const objects = fabricCanvas.current.getObjects();
+                  console.log("Canvas Objects:", objects);
+                }}
+                className="px-3 py-1.5 bg-gray-700 text-gray-200 rounded-md hover:bg-gray-600 transition-colors text-sm flex items-center space-x-1"
+              >
                 <Download size={14} />
                 <span>Export</span>
               </button>
@@ -240,6 +279,16 @@ export default function Editor() {
                 </h3>
 
                 <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => addShape("layout")}
+                    className="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors flex flex-col items-center space-y-1 group"
+                  >
+                    <Layers
+                      size={20}
+                      className="text-blue-400 group-hover:text-blue-300"
+                    />
+                    <span className="text-xs text-gray-300">Layout</span>
+                  </button>
                   <button
                     onClick={() => addShape("circle")}
                     className="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors flex flex-col items-center space-y-1 group"
