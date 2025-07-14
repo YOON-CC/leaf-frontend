@@ -39,6 +39,9 @@ export default function Editor() {
   const isIntersectingRef = useRef(false);
   const layoutObjectRef = useRef<fabric.Object | null>(null);
   const movingObjectRef = useRef<fabric.Object | null>(null);
+  const [hoveredLayout, setHoveredLayout] = useState<fabric.Object | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const menuTimeoutRef = useRef<any>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -70,14 +73,15 @@ export default function Editor() {
       if (!movingObj) return;
 
       let intersecting = false;
-      let collidedLayout: fabric.Object | null = null;
+      let collidedLayout: fabric.Rect | null = null;
 
       layoutListRef.current.forEach((layout) => {
-        if (movingObj === layout) return; // 자기 자신 제외
+        if (movingObj === layout) return;
+
         if (movingObj.intersectsWithObject(layout)) {
-          layout.set("fill", "rgba(255,0,0,0.2)"); // 빨강으로 변경
+          layout.set("fill", "rgba(255,0,0,0.2)");
           intersecting = true;
-          collidedLayout = layout; // 충돌한 layout 저장
+          collidedLayout = layout;
         } else {
           layout.set("fill", "rgba(0, 145, 255, 0.1)");
         }
@@ -88,11 +92,45 @@ export default function Editor() {
       movingObjectRef.current = movingObj;
 
       fabricCanvas.current?.renderAll();
+
+      if (intersecting && collidedLayout && fabricCanvas.current) {
+        const canvasElement = fabricCanvas.current.getElement().getBoundingClientRect();
+        const layoutMenu = collidedLayout as fabric.Rect;
+
+        const center = {
+          x: (layoutMenu.left || 0) + (layoutMenu.width || 0) / 2,
+          y: (layoutMenu.top || 0) + (layoutMenu.height || 0) / 2,
+        };
+
+        setMenuPosition({
+          x: canvasElement.left + center.x,
+          y: canvasElement.top + center.y,
+        });
+
+        setHoveredLayout(collidedLayout);
+
+        // 기존 타이머 있으면 클리어
+        if (menuTimeoutRef.current) clearTimeout(menuTimeoutRef.current);
+
+        // 3초 뒤 메뉴 자동 닫기
+        menuTimeoutRef.current = setTimeout(() => {
+          setHoveredLayout(null);
+          setMenuPosition(null);
+        }, 2000);
+      } else {
+        setHoveredLayout(null);
+        setMenuPosition(null);
+
+        if (menuTimeoutRef.current) {
+          clearTimeout(menuTimeoutRef.current);
+          menuTimeoutRef.current = null;
+        }
+      }
     });
 
     fabricCanvas.current.on("object:modified", () => {
       if (isIntersectingRef.current) {
-        creatingRelationShip(layoutObjectRef.current, movingObjectRef.current);
+        // creatingRelationShip(layoutObjectRef.current, movingObjectRef.current);
 
         // layout 색상 원래대로 복구
         layoutListRef.current.forEach((layout) => {
@@ -102,7 +140,6 @@ export default function Editor() {
         fabricCanvas.current?.renderAll();
       }
       isIntersectingRef.current = false;
-      movingObjectRef.current = null;
     });
 
     return () => {
@@ -117,7 +154,7 @@ export default function Editor() {
     movingObject: fabric.Object | null
   ) => {
     console.log("도형이 레이아웃에 들어왔습니다.", layoutObject, movingObject);
-
+    movingObjectRef.current = null;
     // if (movingObj && layout) {
     //   console.log("도형:", movingObj);
     //   console.log("레이아웃:", layout);
@@ -602,6 +639,32 @@ export default function Editor() {
           </div>
         </div>
       </div>
+      {hoveredLayout && menuPosition && (
+        <div
+          style={{
+            position: "absolute",
+            top: menuPosition.y,
+            left: menuPosition.x,
+            transform: "translate(-50%, -100%)",
+            backgroundColor: "white",
+            border: "1px solid #ccc",
+            padding: "8px",
+            borderRadius: "8px",
+            boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+            zIndex: 999,
+          }}
+        >
+          <button
+            onClick={() => {
+              creatingRelationShip(hoveredLayout, movingObjectRef.current);
+              setHoveredLayout(null);
+              setMenuPosition(null);
+            }}
+          >
+            레이아웃에 추가
+          </button>
+        </div>
+      )}
     </div>
   );
 }
