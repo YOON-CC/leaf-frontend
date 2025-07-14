@@ -17,7 +17,14 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
-
+interface TreeNode {
+  id: string; // customId
+  object: fabric.Object;
+  children: TreeNode[];
+}
+interface FabricObjectWithId extends fabric.Object {
+  customId?: string;
+}
 export default function Editor() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricCanvas = useRef<fabric.Canvas | null>(null);
@@ -149,19 +156,74 @@ export default function Editor() {
   }, []);
 
   // 계층관계 생성
+  const [tree, setTree] = useState<TreeNode[]>([]);
+
   const creatingRelationShip = (
     layoutObject: fabric.Object | null,
     movingObject: fabric.Object | null
   ) => {
-    console.log("도형이 레이아웃에 들어왔습니다.", layoutObject, movingObject);
-    movingObjectRef.current = null;
-    // if (movingObj && layout) {
-    //   console.log("도형:", movingObj);
-    //   console.log("레이아웃:", layout);
-    // } else {
-    //   console.log("충돌 정보가 없습니다.");
-    // }
+    if (!layoutObject || !movingObject) return;
+
+  const parentId = (layoutObject as FabricObjectWithId).customId;
+  const childId = (movingObject as FabricObjectWithId).customId;
+
+    if (!parentId || !childId) {
+      console.warn("customId가 없습니다.");
+      return;
+    }
+
+    setTree((prevTree) => {
+      // 부모 찾기 함수
+      const findAndInsert = (nodes: TreeNode[]): TreeNode[] => {
+        return nodes.map((node) => {
+          if (node.id === parentId) {
+            return {
+              ...node,
+              children: [
+                ...node.children,
+                {
+                  id: childId,
+                  object: movingObject,
+                  children: [],
+                },
+              ],
+            };
+          } else {
+            return {
+              ...node,
+              children: findAndInsert(node.children),
+            };
+          }
+        });
+      };
+
+      // 부모가 기존 트리에 있을 때
+      const newTree = findAndInsert(prevTree);
+
+      // 부모가 트리에 없으면 새로 추가
+      const parentExists = JSON.stringify(newTree) !== JSON.stringify(prevTree);
+      if (parentExists) return newTree;
+
+      // 새로운 부모 노드를 만들어서 추가
+      return [
+        ...prevTree,
+        {
+          id: parentId,
+          object: layoutObject,
+          children: [
+            {
+              id: childId,
+              object: movingObject,
+              children: [],
+            },
+          ],
+        },
+      ];
+    });
   };
+
+  console.log(tree)
+
 
   const updatePropertiesFromObject = (obj: fabric.Object) => {
     setObjectProperties({
@@ -177,77 +239,92 @@ export default function Editor() {
   const layoutListRef = useRef<fabric.Rect[]>([]);
 
   const addShape = (type: string) => {
-    if (!fabricCanvas.current) return;
+  if (!fabricCanvas.current) return;
 
-    let shape: fabric.Object;
+  let shape: fabric.Object | null = null;
 
-    switch (type) {
-      case "layout": {
-        const layout = new fabric.Rect({
-          width: 400,
-          height: 60,
-          fill: "rgba(0, 145, 255, 0.1)",
-          left: 100,
-          top: 100,
-          strokeDashArray: [5, 5],
-          strokeUniform: true,
-        });
-        layout.set("customId", uuidv4()); // UUID 추가
-        layoutListRef.current.push(layout);
-        shape = layout;
-        break;
-      }
-
-      case "circle":
-        shape = new fabric.Circle({
-          radius: 50,
-          fill: "#3b82f6",
-          left: 100,
-          top: 100,
-        });
-        shape.set("customId", uuidv4());
-        break;
-
-      case "rectangle":
-        shape = new fabric.Rect({
-          width: 100,
-          height: 60,
-          fill: "#ef4444",
-          left: 100,
-          top: 100,
-        });
-        shape.set("customId", uuidv4());
-        break;
-
-      case "triangle":
-        shape = new fabric.Triangle({
-          width: 100,
-          height: 100,
-          fill: "#10b981",
-          left: 100,
-          top: 100,
-        });
-        shape.set("customId", uuidv4());
-        break;
-
-      case "text":
-        shape = new fabric.Text("텍스트", {
-          left: 100,
-          top: 100,
-          fontSize: 24,
-          fill: "#1f2937",
-        });
-        shape.set("customId", uuidv4());
-        break;
-
-      default:
-        return;
+  switch (type) {
+    case "layout": {
+      const layout = new fabric.Rect({
+        width: 400,
+        height: 60,
+        fill: "rgba(0, 145, 255, 0.1)",
+        left: 100,
+        top: 100,
+        strokeDashArray: [5, 5],
+        strokeUniform: true,
+      });
+      layout.set("customId", uuidv4());
+      layout.set("shapeType", "layout");
+      layoutListRef.current.push(layout);
+      shape = layout;
+      break;
     }
+
+    case "circle": {
+      const circle = new fabric.Circle({
+        radius: 50,
+        fill: "#3b82f6",
+        left: 100,
+        top: 100,
+      });
+      circle.set("customId", uuidv4());
+      circle.set("shapeType", "circle");
+      shape = circle;
+      break;
+    }
+
+    case "rectangle": {
+      const rect = new fabric.Rect({
+        width: 100,
+        height: 60,
+        fill: "#ef4444",
+        left: 100,
+        top: 100,
+      });
+      rect.set("customId", uuidv4());
+      rect.set("shapeType", "rectangle");
+      shape = rect;
+      break;
+    }
+
+    case "triangle": {
+      const triangle = new fabric.Triangle({
+        width: 100,
+        height: 100,
+        fill: "#10b981",
+        left: 100,
+        top: 100,
+      });
+      triangle.set("customId", uuidv4());
+      triangle.set("shapeType", "triangle");
+      shape = triangle;
+      break;
+    }
+
+    case "text": {
+      const text = new fabric.Text("텍스트", {
+        left: 100,
+        top: 100,
+        fontSize: 24,
+        fill: "#1f2937",
+      });
+      text.set("customId", uuidv4());
+      text.set("shapeType", "text");
+      shape = text;
+      break;
+    }
+    default:
+      return;
+    }
+
+    if (!shape) return;
 
     fabricCanvas.current.add(shape);
     fabricCanvas.current.setActiveObject(shape);
-    fabricCanvas.current.renderAll();
+    fabricCanvas.current.requestRenderAll();
   };
+
 
   const updateProperty = (property: string, value: string | number) => {
     if (!selectedObject || !fabricCanvas.current) return;
@@ -275,6 +352,52 @@ export default function Editor() {
     fabricCanvas.current.renderAll();
   };
 
+  const renderTree = (nodes: TreeNode[], level = 0) => {
+    return (
+      <ul className={`${level === 0 ? "pl-0" : "pl-6"} space-y-1`}>
+        {nodes.map((node) => {
+          const shapeType = node.object.get?.("shapeType") || undefined;
+          const label =
+            (node.object as any).name ||
+            (node.object as any).label ||
+            (shapeType ?? node.object.type);
+
+          return (
+            <li key={node.id}>
+              <div
+                className={`flex items-center gap-2 cursor-pointer select-none rounded-mdtext-gray-100 text-sm hover:bg-gray-700 p-1 text-white`}
+                style={{ paddingLeft: level === 0 ? 4 : undefined }}
+              >
+                {getIcon(node.object.type, shapeType)}
+                <span>{label}</span>
+              </div>
+
+              {node.children.length > 0 && renderTree(node.children, level + 1)}
+            </li>
+          );
+        })}
+      </ul>
+    );
+  };
+
+
+
+  const getIcon = (type: string, shapeType?: string) => {
+    if (shapeType === "layout") return <Layers size={16} className="text-blue-400" />;
+
+    switch (type) {
+      case "rect":
+        return <Square size={16} className="text-green-400" />;
+      case "circle":
+        return <Circle size={16} className="text-pink-400" />;
+      case "triangle":
+        return <Triangle size={16} className="text-yellow-400" />;
+      default:
+        return <Layers size={16} className="text-gray-400" />;
+    }
+  };
+
+  
   return (
     <div className="h-screen bg-gray-900 flex flex-col">
       {/* 상단 툴바 */}
@@ -428,10 +551,16 @@ export default function Editor() {
                 <h3 className="text-sm font-semibold text-gray-300 mb-3">
                   Layers
                 </h3>
-                <div className="text-center py-8 text-gray-500">
-                  <Layers size={32} className="mx-auto mb-2 text-gray-600" />
-                  <p className="text-sm">No layers yet</p>
-                </div>
+                {tree.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Layers size={32} className="mx-auto mb-2 text-gray-600" />
+                    <p className="text-sm">No layers yet</p>
+                  </div>
+                ) : (
+                  <div className="text-sm">
+                    {renderTree(tree)}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -442,7 +571,6 @@ export default function Editor() {
           <div className="bg-white rounded-lg shadow-xl">
             <canvas
               ref={canvasRef}
-              className="rounded-lg"
               style={{ boxShadow: "0 0 0 1px rgba(0,0,0,0.1)" }}
             />
           </div>
