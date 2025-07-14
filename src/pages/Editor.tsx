@@ -79,6 +79,28 @@ export default function Editor() {
       const movingObj = e.target;
       if (!movingObj) return;
 
+      const shapeType = movingObj.get?.("shapeType");
+      if (shapeType === "layout") {
+        const layoutId = movingObj.get("customId");
+        if (!layoutId) return;
+
+        const prevLeft = movingObj.get("prevLeft") ?? movingObj.left!;
+        const prevTop = movingObj.get("prevTop") ?? movingObj.top!;
+
+        const dx = movingObj.left! - prevLeft;
+        const dy = movingObj.top! - prevTop;
+
+        const node = findNodeById(treeRef.current, layoutId);
+
+        if (node && fabricCanvas.current) {
+          moveNodeAndDescendants(node, dx, dy);
+          fabricCanvas.current.requestRenderAll();
+        }
+
+        movingObj.set("prevLeft", movingObj.left);
+        movingObj.set("prevTop", movingObj.top);
+      }
+
       let intersecting = false;
       let collidedLayout: fabric.Rect | null = null;
 
@@ -86,11 +108,11 @@ export default function Editor() {
         if (movingObj === layout) return;
 
         if (movingObj.intersectsWithObject(layout)) {
-          layout.set("fill", "rgba(255,0,0,0.2)");
+          layout.set("fill", "rgba(0, 145, 255, 0.1)");
           intersecting = true;
           collidedLayout = layout;
         } else {
-          layout.set("fill", "rgba(0, 145, 255, 0.1)");
+          layout.set("fill", "rgba(255, 255, 255, 0.95)");
         }
       });
 
@@ -101,25 +123,22 @@ export default function Editor() {
       fabricCanvas.current?.renderAll();
 
       if (intersecting && collidedLayout && fabricCanvas.current) {
-        const canvasElement = fabricCanvas.current.getElement().getBoundingClientRect();
+        const canvasRect = fabricCanvas.current.getElement().getBoundingClientRect();
         const layoutMenu = collidedLayout as fabric.Rect;
-
         const center = {
-          x: (layoutMenu.left || 0) + (layoutMenu.width || 0) / 2,
-          y: (layoutMenu.top || 0) + (layoutMenu.height || 0) / 2,
+          x: (layoutMenu.left ?? 0) + (layoutMenu.width ?? 0) / 2,
+          y: (layoutMenu.top ?? 0) + (layoutMenu.height ?? 0) / 2,
         };
 
         setMenuPosition({
-          x: canvasElement.left + center.x,
-          y: canvasElement.top + center.y,
+          x: canvasRect.left + center.x,
+          y: canvasRect.top + center.y,
         });
 
         setHoveredLayout(collidedLayout);
 
-        // 기존 타이머 있으면 클리어
         if (menuTimeoutRef.current) clearTimeout(menuTimeoutRef.current);
 
-        // 3초 뒤 메뉴 자동 닫기
         menuTimeoutRef.current = setTimeout(() => {
           setHoveredLayout(null);
           setMenuPosition(null);
@@ -156,8 +175,13 @@ export default function Editor() {
   }, []);
 
   // 계층관계 생성
+  const treeRef = useRef<TreeNode[]>([]);
   const [tree, setTree] = useState<TreeNode[]>([]);
 
+  // tree 상태 업데이트시 ref도 업데이트
+  useEffect(() => {
+    treeRef.current = tree;
+  }, [tree]);
   const creatingRelationShip = (
     layoutObject: fabric.Object | null,
     movingObject: fabric.Object | null
@@ -222,6 +246,35 @@ export default function Editor() {
     });
   };
 
+  // 트리에서 id에 해당하는 노드 재귀 탐색
+  function findNodeById(tree: TreeNode[], id: string): TreeNode | null {
+    for (const node of tree) {
+      if (node.id === id) return node;
+      if (node.children && node.children.length > 0) {
+        const found = findNodeById(node.children, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
+  // 노드와 모든 하위 자식 노드들 위치 재귀 이동
+  function moveNodeAndDescendants(node: TreeNode, dx: number, dy: number) {
+    if (!node.children) return;
+    node.children.forEach((child) => {
+      const obj = child.object;
+      if (!obj) return;
+
+      obj.set({
+        left: (obj.left ?? 0) + dx,
+        top: (obj.top ?? 0) + dy,
+      });
+      obj.setCoords();
+
+      moveNodeAndDescendants(child, dx, dy);
+    });
+  }
+
   console.log(tree)
 
 
@@ -248,10 +301,12 @@ export default function Editor() {
       const layout = new fabric.Rect({
         width: 400,
         height: 60,
-        fill: "rgba(0, 145, 255, 0.1)",
+        fill: "rgba(255, 255, 255, 0.95)", // 거의 흰색, 약간 투명
         left: 100,
         top: 100,
-        strokeDashArray: [5, 5],
+        stroke: "rgba(0, 145, 255, 0.3)", // 연하고 부드러운 파란색 테두리
+        strokeWidth: 1,
+        strokeDashArray: [2, 2],
         strokeUniform: true,
       });
       layout.set("customId", uuidv4());
