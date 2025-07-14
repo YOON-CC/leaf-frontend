@@ -46,8 +46,14 @@ export default function Editor() {
   const isIntersectingRef = useRef(false);
   const layoutObjectRef = useRef<fabric.Object | null>(null);
   const movingObjectRef = useRef<fabric.Object | null>(null);
-  const [hoveredLayout, setHoveredLayout] = useState<fabric.Object | null>(null);
-  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const [hoveredLayout, setHoveredLayout] = useState<fabric.Object | null>(
+    null
+  );
+  const [menuPosition, setMenuPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const menuTimeoutRef = useRef<any>(null);
 
   useEffect(() => {
@@ -112,7 +118,7 @@ export default function Editor() {
           intersecting = true;
           collidedLayout = layout;
         } else {
-          layout.set("fill", "rgba(255, 255, 255, 0.95)");
+          layout.set("fill", "rgba(255, 255, 255, 0.1)");
         }
       });
 
@@ -123,7 +129,9 @@ export default function Editor() {
       fabricCanvas.current?.renderAll();
 
       if (intersecting && collidedLayout && fabricCanvas.current) {
-        const canvasRect = fabricCanvas.current.getElement().getBoundingClientRect();
+        const canvasRect = fabricCanvas.current
+          .getElement()
+          .getBoundingClientRect();
         const layoutMenu = collidedLayout as fabric.Rect;
         const center = {
           x: (layoutMenu.left ?? 0) + (layoutMenu.width ?? 0) / 2,
@@ -160,7 +168,7 @@ export default function Editor() {
 
         // layout 색상 원래대로 복구
         layoutListRef.current.forEach((layout) => {
-          layout.set("fill", "rgba(0, 145, 255, 0.1)");
+          layout.set("fill", "rgba(255, 255, 255, 0.1)");
         });
 
         fabricCanvas.current?.renderAll();
@@ -188,8 +196,8 @@ export default function Editor() {
   ) => {
     if (!layoutObject || !movingObject) return;
 
-  const parentId = (layoutObject as FabricObjectWithId).customId;
-  const childId = (movingObject as FabricObjectWithId).customId;
+    const parentId = (layoutObject as FabricObjectWithId).customId;
+    const childId = (movingObject as FabricObjectWithId).customId;
 
     if (!parentId || !childId) {
       console.warn("customId가 없습니다.");
@@ -275,8 +283,7 @@ export default function Editor() {
     });
   }
 
-  console.log(tree)
-
+  console.log(tree);
 
   const updatePropertiesFromObject = (obj: fabric.Object) => {
     setObjectProperties({
@@ -292,85 +299,85 @@ export default function Editor() {
   const layoutListRef = useRef<fabric.Rect[]>([]);
 
   const addShape = (type: string) => {
-  if (!fabricCanvas.current) return;
+    if (!fabricCanvas.current) return;
 
-  let shape: fabric.Object | null = null;
+    let shape: fabric.Object | null = null;
 
-  switch (type) {
-    case "layout": {
-      const layout = new fabric.Rect({
-        width: 400,
-        height: 60,
-        fill: "rgba(255, 255, 255, 0.95)", // 거의 흰색, 약간 투명
-        left: 100,
-        top: 100,
-        stroke: "rgba(0, 145, 255, 0.3)", // 연하고 부드러운 파란색 테두리
-        strokeWidth: 1,
-        strokeDashArray: [2, 2],
-        strokeUniform: true,
-      });
-      layout.set("customId", uuidv4());
-      layout.set("shapeType", "layout");
-      layoutListRef.current.push(layout);
-      shape = layout;
-      break;
-    }
+    switch (type) {
+      case "layout": {
+        const layout = new fabric.Rect({
+          width: 400,
+          height: 60,
+          fill: "rgba(255, 255, 255, 0.1)", // 거의 흰색, 약간 투명
+          left: 100,
+          top: 100,
+          stroke: "rgba(0, 145, 255, 0.3)", // 연하고 부드러운 파란색 테두리
+          strokeWidth: 1,
+          strokeDashArray: [2, 2],
+          strokeUniform: true,
+        });
+        layout.set("customId", uuidv4());
+        layout.set("shapeType", "layout");
+        layoutListRef.current.push(layout);
+        shape = layout;
+        break;
+      }
 
-    case "circle": {
-      const circle = new fabric.Circle({
-        radius: 50,
-        fill: "#3b82f6",
-        left: 100,
-        top: 100,
-      });
-      circle.set("customId", uuidv4());
-      circle.set("shapeType", "circle");
-      shape = circle;
-      break;
-    }
+      case "circle": {
+        const circle = new fabric.Circle({
+          radius: 50,
+          fill: "#3b82f6",
+          left: 100,
+          top: 100,
+        });
+        circle.set("customId", uuidv4());
+        circle.set("shapeType", "circle");
+        shape = circle;
+        break;
+      }
 
-    case "rectangle": {
-      const rect = new fabric.Rect({
-        width: 100,
-        height: 60,
-        fill: "#ef4444",
-        left: 100,
-        top: 100,
-      });
-      rect.set("customId", uuidv4());
-      rect.set("shapeType", "rectangle");
-      shape = rect;
-      break;
-    }
+      case "rectangle": {
+        const rect = new fabric.Rect({
+          width: 100,
+          height: 60,
+          fill: "#ef4444",
+          left: 100,
+          top: 100,
+        });
+        rect.set("customId", uuidv4());
+        rect.set("shapeType", "rectangle");
+        shape = rect;
+        break;
+      }
 
-    case "triangle": {
-      const triangle = new fabric.Triangle({
-        width: 100,
-        height: 100,
-        fill: "#10b981",
-        left: 100,
-        top: 100,
-      });
-      triangle.set("customId", uuidv4());
-      triangle.set("shapeType", "triangle");
-      shape = triangle;
-      break;
-    }
+      case "triangle": {
+        const triangle = new fabric.Triangle({
+          width: 100,
+          height: 100,
+          fill: "#10b981",
+          left: 100,
+          top: 100,
+        });
+        triangle.set("customId", uuidv4());
+        triangle.set("shapeType", "triangle");
+        shape = triangle;
+        break;
+      }
 
-    case "text": {
-      const text = new fabric.Text("텍스트", {
-        left: 100,
-        top: 100,
-        fontSize: 24,
-        fill: "#1f2937",
-      });
-      text.set("customId", uuidv4());
-      text.set("shapeType", "text");
-      shape = text;
-      break;
-    }
-    default:
-      return;
+      case "text": {
+        const text = new fabric.Text("텍스트", {
+          left: 100,
+          top: 100,
+          fontSize: 24,
+          fill: "#1f2937",
+        });
+        text.set("customId", uuidv4());
+        text.set("shapeType", "text");
+        shape = text;
+        break;
+      }
+      default:
+        return;
     }
 
     if (!shape) return;
@@ -379,7 +386,6 @@ export default function Editor() {
     fabricCanvas.current.setActiveObject(shape);
     fabricCanvas.current.requestRenderAll();
   };
-
 
   const updateProperty = (property: string, value: string | number) => {
     if (!selectedObject || !fabricCanvas.current) return;
@@ -413,7 +419,9 @@ export default function Editor() {
         {nodes.map((node) => {
           const shapeType = node.object.get?.("shapeType") || undefined;
           const label =
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (node.object as any).name ||
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (node.object as any).label ||
             (shapeType ?? node.object.type);
 
@@ -435,10 +443,9 @@ export default function Editor() {
     );
   };
 
-
-
   const getIcon = (type: string, shapeType?: string) => {
-    if (shapeType === "layout") return <Layers size={16} className="text-blue-400" />;
+    if (shapeType === "layout")
+      return <Layers size={16} className="text-blue-400" />;
 
     switch (type) {
       case "rect":
@@ -452,7 +459,6 @@ export default function Editor() {
     }
   };
 
-  
   return (
     <div className="h-screen bg-gray-900 flex flex-col">
       {/* 상단 툴바 */}
@@ -612,9 +618,7 @@ export default function Editor() {
                     <p className="text-sm">No layers yet</p>
                   </div>
                 ) : (
-                  <div className="text-sm">
-                    {renderTree(tree)}
-                  </div>
+                  <div className="text-sm">{renderTree(tree)}</div>
                 )}
               </div>
             )}
