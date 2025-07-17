@@ -17,14 +17,13 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { createShape } from "../utils/fabric/createShape";
+import { addChildToTree, findNodeByIdInTree, moveSubtreeInTree } from '../utils/tree/treeUtils';
 interface TreeNode {
   id: string; // customId
   object: fabric.Object;
   children: TreeNode[];
 }
-interface FabricObjectWithId extends fabric.Object {
-  customId?: string;
-}
+
 export default function Editor() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricCanvas = useRef<fabric.Canvas | null>(null);
@@ -97,10 +96,10 @@ export default function Editor() {
         const dx = movingObj.left! - prevLeft;
         const dy = movingObj.top! - prevTop;
 
-        const node = findNodeById(treeRef.current, layoutId);
+        const node = findNodeByIdInTree(treeRef.current, layoutId);
 
         if (node && fabricCanvas.current) {
-          moveNodeAndDescendants(node, dx, dy);
+          moveSubtreeInTree(node, dx, dy);
           fabricCanvas.current.requestRenderAll();
         }
 
@@ -164,6 +163,7 @@ export default function Editor() {
     });
 
     fabricCanvas.current.on("object:modified", () => {
+      
       if (isIntersectingRef.current) {
         // creatingRelationShip(layoutObjectRef.current, movingObjectRef.current);
 
@@ -192,98 +192,6 @@ export default function Editor() {
     treeRef.current = tree;
   }, [tree]);
 
-  const creatingRelationShip = (
-    layoutObject: fabric.Object | null,
-    movingObject: fabric.Object | null
-  ) => {
-    if (!layoutObject || !movingObject) return;
-
-    const parentId = (layoutObject as FabricObjectWithId).customId;
-    const childId = (movingObject as FabricObjectWithId).customId;
-
-    if (!parentId || !childId) {
-      console.warn("customId가 없습니다.");
-      return;
-    }
-
-    setTree((prevTree) => {
-      // 부모 찾기 함수
-      const findAndInsert = (nodes: TreeNode[]): TreeNode[] => {
-        return nodes.map((node) => {
-          if (node.id === parentId) {
-            return {
-              ...node,
-              children: [
-                ...node.children,
-                {
-                  id: childId,
-                  object: movingObject,
-                  children: [],
-                },
-              ],
-            };
-          } else {
-            return {
-              ...node,
-              children: findAndInsert(node.children),
-            };
-          }
-        });
-      };
-
-      // 부모가 기존 트리에 있을 때
-      const newTree = findAndInsert(prevTree);
-
-      // 부모가 트리에 없으면 새로 추가
-      const parentExists = JSON.stringify(newTree) !== JSON.stringify(prevTree);
-      if (parentExists) return newTree;
-
-      // 새로운 부모 노드를 만들어서 추가
-      return [
-        ...prevTree,
-        {
-          id: parentId,
-          object: layoutObject,
-          children: [
-            {
-              id: childId,
-              object: movingObject,
-              children: [],
-            },
-          ],
-        },
-      ];
-    });
-  };
-
-  // 트리에서 id에 해당하는 노드 재귀 탐색
-  function findNodeById(tree: TreeNode[], id: string): TreeNode | null {
-    for (const node of tree) {
-      if (node.id === id) return node;
-      if (node.children && node.children.length > 0) {
-        const found = findNodeById(node.children, id);
-        if (found) return found;
-      }
-    }
-    return null;
-  }
-
-  // 노드와 모든 하위 자식 노드들 위치 재귀 이동
-  function moveNodeAndDescendants(node: TreeNode, dx: number, dy: number) {
-    if (!node.children) return;
-    node.children.forEach((child) => {
-      const obj = child.object;
-      if (!obj) return;
-
-      obj.set({
-        left: (obj.left ?? 0) + dx,
-        top: (obj.top ?? 0) + dy,
-      });
-      obj.setCoords();
-
-      moveNodeAndDescendants(child, dx, dy);
-    });
-  }
 
   console.log(tree);
 
@@ -358,6 +266,11 @@ export default function Editor() {
             (node.object as any).label ||
             (shapeType ?? node.object.type);
 
+            
+          // 좌표 가져오기 (소수점 한자리로 표현)
+          const left = node.object.left?.toFixed(1) ?? "0.0";
+          const top = node.object.top?.toFixed(1) ?? "0.0";
+
           return (
             <li key={node.id}>
               <div
@@ -366,6 +279,10 @@ export default function Editor() {
               >
                 {getIcon(node.object.type, shapeType)}
                 <span>{label}</span>
+                {/* 좌표 추가 */}
+                <span className="ml-auto text-xs text-gray-300">
+                  ({left}, {top})
+                </span>
               </div>
 
               {node.children.length > 0 && renderTree(node.children, level + 1)}
@@ -375,6 +292,7 @@ export default function Editor() {
       </ul>
     );
   };
+
   function getIcon(type: string, shapeType?: string) {
     if (shapeType === "layout") {
       return <Layers size={16} className="text-blue-400" />;
@@ -776,7 +694,7 @@ export default function Editor() {
         >
           <button
             onClick={() => {
-              creatingRelationShip(hoveredLayout, movingObjectRef.current);
+              addChildToTree(setTree, hoveredLayout, movingObjectRef.current);
               setHoveredLayout(null);
               setMenuPosition(null);
             }}
