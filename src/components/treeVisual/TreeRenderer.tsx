@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { Circle, Layers, Square, Triangle } from "lucide-react";
 import type { TreeNode } from "../../types/fabricTypes";
 import {
@@ -10,26 +10,43 @@ import {
 } from "../../utils/handlers/dragAndDrop";
 
 type RenderTreeProps = {
-  nodes: TreeNode[];
-  level?: number;
-  setDraggedNodeId: (id: string | null) => void;
-  dragOverNodeId: string | null;
-  draggedNodeId: string | null;
+  tree: TreeNode[];
   setTree: React.Dispatch<React.SetStateAction<TreeNode[]>>;
-  unlinkedNodes: TreeNode[];
-  setDragOverNodeId: (id: string | null) => void;
+  fabricCanvas: any;
 };
 
 export default function RenderTree({
-  nodes,
-  level = 0,
-  setDraggedNodeId,
-  dragOverNodeId,
-  draggedNodeId,
+  tree,
   setTree,
-  unlinkedNodes,
-  setDragOverNodeId,
+  fabricCanvas,
 }: RenderTreeProps) {
+  const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
+  const [dragOverNodeId, setDragOverNodeId] = useState<string | null>(null);
+
+  // 트리 flatten
+  const flattenTreeIds = (node: TreeNode): string[] => {
+    return [node.id, ...node.children.flatMap(flattenTreeIds)];
+  };
+
+  const treeIds = useMemo(() => new Set(tree.flatMap(flattenTreeIds)), [tree]);
+
+  // unlinkedNodes 계산
+  const unlinkedNodes: TreeNode[] = useMemo(() => {
+    if (!fabricCanvas) return [];
+    return (fabricCanvas.getObjects() || [])
+      .filter((obj: any) => {
+        const id = (obj as any).customId;
+        return id && !treeIds.has(id);
+      })
+      .map((obj: any) => ({
+        id: (obj as any).customId,
+        object: obj,
+        children: [],
+      }));
+  }, [fabricCanvas, treeIds]);
+
+  const combinedTree = [...tree, ...unlinkedNodes];
+
   function getIcon(type: string, shapeType?: string) {
     if (shapeType === "layout") {
       return <Layers size={16} className="text-blue-400" />;
@@ -47,7 +64,7 @@ export default function RenderTree({
     }
   }
 
-  return (
+  const render = (nodes: TreeNode[], level = 0) => (
     <ul className={`${level === 0 ? "pl-0" : "pl-6"} space-y-1`}>
       {nodes.map((node) => {
         const shapeType = node.object.get?.("shapeType") || undefined;
@@ -84,24 +101,17 @@ export default function RenderTree({
               style={{ paddingLeft: level === 0 ? 4 : undefined }}
             >
               {getIcon(node.object.type, shapeType)}
-              <span>{label}</span>
+              <span>
+                {label} {node.id}
+              </span>
             </div>
 
-            {node.children.length > 0 && (
-              <RenderTree
-                nodes={node.children}
-                level={level + 1}
-                setDraggedNodeId={setDraggedNodeId}
-                dragOverNodeId={dragOverNodeId}
-                draggedNodeId={draggedNodeId}
-                setTree={setTree}
-                unlinkedNodes={unlinkedNodes}
-                setDragOverNodeId={setDragOverNodeId}
-              />
-            )}
+            {node.children.length > 0 && render(node.children, level + 1)}
           </li>
         );
       })}
     </ul>
   );
+
+  return render(combinedTree);
 }

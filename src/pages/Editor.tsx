@@ -23,13 +23,7 @@ import {
   findNodeByIdInTree,
   moveSubtreeInTree,
 } from "../utils/tree/treeUtils";
-import {
-  handleDragLeave,
-  handleDragOver,
-  handleDragStart,
-  handleDrop,
-} from "../utils/handlers/dragAndDrop";
-import renderTree from "../components/treeVisual/TreeRenderer";
+
 import RenderTree from "../components/treeVisual/TreeRenderer";
 interface TreeNode {
   id: string; // customId
@@ -264,29 +258,6 @@ export default function Editor() {
     fabricCanvas.current.renderAll();
   };
 
-  // 드래그 로직
-  const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
-
-  // 드래그 오버
-  const [dragOverNodeId, setDragOverNodeId] = useState<string | null>(null);
-
-  const flattenTreeIds = (node: TreeNode): string[] => {
-    return [node.id, ...node.children.flatMap(flattenTreeIds)];
-  };
-
-  const treeIds = new Set(tree.flatMap(flattenTreeIds));
-
-  const unlinkedNodes: TreeNode[] = (fabricCanvas.current?.getObjects() || [])
-    .filter((obj) => {
-      const id = (obj as any).customId;
-      return id && !treeIds.has(id);
-    })
-    .map((obj) => ({
-      id: (obj as any).customId,
-      object: obj,
-      children: [],
-    }));
-
   return (
     <div className="h-screen bg-gray-900 flex flex-col">
       {/* 상단 툴바 */}
@@ -454,13 +425,9 @@ export default function Editor() {
                       // getIcon,
                       /> */}
                     <RenderTree
-                      nodes={[...tree, ...unlinkedNodes]}
-                      setDraggedNodeId={setDraggedNodeId}
-                      dragOverNodeId={dragOverNodeId}
-                      draggedNodeId={draggedNodeId}
+                      tree={tree}
                       setTree={setTree}
-                      unlinkedNodes={unlinkedNodes}
-                      setDragOverNodeId={setDragOverNodeId}
+                      fabricCanvas={fabricCanvas.current}
                     />
                   </div>
                 </div>
