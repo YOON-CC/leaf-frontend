@@ -1,8 +1,9 @@
 import * as fabric from "fabric";
-import type { FabricObjectWithId, TreeNode } from '../../types/fabricTypes';
+import type { FabricObjectWithId, TreeNode } from "../../types/fabricTypes";
 
 // 🟢🟢🟢🟢🟢🟢🟢🟢 레이아웃에 추가
 export const addChildToTree = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setTree: any,
   layoutObject: fabric.Object | null,
   movingObject: fabric.Object | null
@@ -17,6 +18,7 @@ export const addChildToTree = (
     return;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setTree((prevTree: any) => {
     // 부모 찾기 함수
     const findAndInsert = (nodes: TreeNode[]): TreeNode[] => {
@@ -68,7 +70,10 @@ export const addChildToTree = (
 };
 
 // 🟢🟢🟢🟢🟢🟢🟢🟢 특정 레이아웃의 자식들 찾기
-export function findNodeByIdInTree(tree: TreeNode[], id: string): TreeNode | null {
+export function findNodeByIdInTree(
+  tree: TreeNode[],
+  id: string
+): TreeNode | null {
   for (const node of tree) {
     if (node.id === id) return node;
     if (node.children && node.children.length > 0) {
@@ -97,6 +102,6 @@ export function moveSubtreeInTree(node: TreeNode, dx: number, dy: number) {
 
     obj.setCoords();
 
-    moveSubtreeInTree(child, dx, dy); 
+    moveSubtreeInTree(child, dx, dy);
   });
 }

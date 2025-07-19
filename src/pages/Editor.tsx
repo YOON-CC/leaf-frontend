@@ -17,7 +17,11 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { createShape } from "../utils/fabric/createShape";
-import { addChildToTree, findNodeByIdInTree, moveSubtreeInTree } from '../utils/tree/treeUtils';
+import {
+  addChildToTree,
+  findNodeByIdInTree,
+  moveSubtreeInTree,
+} from "../utils/tree/treeUtils";
 interface TreeNode {
   id: string; // customId
   object: fabric.Object;
@@ -163,7 +167,6 @@ export default function Editor() {
     });
 
     fabricCanvas.current.on("object:modified", () => {
-      
       if (isIntersectingRef.current) {
         // creatingRelationShip(layoutObjectRef.current, movingObjectRef.current);
 
@@ -192,8 +195,7 @@ export default function Editor() {
     treeRef.current = tree;
   }, [tree]);
 
-
-  console.log(tree);
+  // console.log(tree);
 
   // 🍎
   const updatePropertiesFromObject = (obj: fabric.Object) => {
@@ -254,6 +256,110 @@ export default function Editor() {
     fabricCanvas.current.renderAll();
   };
 
+  // 🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖 드래그 로직
+  const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
+
+  // 드래그 시작 이벤트 핸들러
+  const handleDragStart = (nodeId: string) => (e: React.DragEvent) => {
+    setDraggedNodeId(nodeId);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", nodeId);
+  };
+
+  // 드롭 이벤트 핸들러 예시
+  const handleDrop =
+    (targetNodeId: string, shapeType: string) => (e: React.DragEvent) => {
+      e.preventDefault();
+      console.log("드랍", targetNodeId, shapeType, dragOverNodeId);
+      if (!draggedNodeId) return;
+      if (!dragOverNodeId) return;
+
+      setTree((prevTree: TreeNode[]) => {
+        // 이동 하는 객체
+        const draggedNode = findNodeByIdInTree(prevTree, draggedNodeId);
+        if (!draggedNode) return prevTree;
+
+        // 이동 목적지
+        const targetNode = findNodeByIdInTree(prevTree, targetNodeId);
+        if (!targetNode) return prevTree;
+
+        // 이동목적지가 layout이어야함
+        const isTargetLayout = shapeType === "layout";
+        console.log("이동 목적지", isTargetLayout);
+        if (!isTargetLayout) {
+          // layout이 아니면 트리 변경하지 않고 이전 상태 유지
+          return prevTree;
+        }
+
+        // 이동한 노드의 부모 제거
+        const removeNodeById = (nodes: TreeNode[], id: string): TreeNode[] => {
+          return nodes
+            .filter((node) => node.id !== id)
+            .map((node) => ({
+              ...node,
+              children: removeNodeById(node.children, id),
+            }));
+        };
+
+        let newTree = removeNodeById(prevTree, draggedNodeId);
+
+        // 새로운 자식 추가
+        const insertNodeToParent = (
+          nodes: TreeNode[],
+          parentId: string,
+          nodeToInsert: TreeNode
+        ): TreeNode[] => {
+          return nodes.map((node) => {
+            if (node.id === parentId) {
+              return {
+                ...node,
+                children: [...node.children, nodeToInsert],
+              };
+            } else {
+              return {
+                ...node,
+                children: insertNodeToParent(
+                  node.children,
+                  parentId,
+                  nodeToInsert
+                ),
+              };
+            }
+          });
+        };
+
+        newTree = insertNodeToParent(newTree, targetNodeId, draggedNode);
+
+        return newTree;
+      });
+
+      setDraggedNodeId(null);
+    };
+
+  // 드래그 오버
+  const [dragOverNodeId, setDragOverNodeId] = useState<string | null>(null);
+  // over 중임 => drop을 하더라도 정상동작할거
+  const handleDragOver = (nodeId: string) => (e: React.DragEvent) => {
+    e.preventDefault();
+    if (!draggedNodeId) return;
+
+    // 자기자신 제외
+    if (nodeId === draggedNodeId) {
+      setDragOverNodeId(null);
+      return;
+    }
+
+    setDragOverNodeId(nodeId);
+  };
+
+  // over 떠남
+  const handleDragLeave = (nodeId: string) => (e: React.DragEvent) => {
+    e.preventDefault();
+    if (dragOverNodeId === nodeId) {
+      setDragOverNodeId(null);
+    }
+  };
+
   const renderTree = (nodes: TreeNode[], level = 0) => {
     return (
       <ul className={`${level === 0 ? "pl-0" : "pl-6"} space-y-1`}>
@@ -266,25 +372,24 @@ export default function Editor() {
             (node.object as any).label ||
             (shapeType ?? node.object.type);
 
-            
-          // 좌표 가져오기 (소수점 한자리로 표현)
-          const left = node.object.left?.toFixed(1) ?? "0.0";
-          const top = node.object.top?.toFixed(1) ?? "0.0";
-
           return (
             <li key={node.id}>
               <div
-                className={`flex items-center gap-2 cursor-pointer select-none rounded-mdtext-gray-100 text-sm hover:bg-gray-700 p-1 text-white`}
+                draggable
+                onDragStart={handleDragStart(node.id)}
+                onDrop={handleDrop(node.id, shapeType)}
+                onDragOver={handleDragOver(node.id)} // nodeId 넘겨줌
+                onDragLeave={handleDragLeave(node.id)}
+                className="flex items-center gap-2 cursor-pointer select-none rounded-md text-gray-100 text-sm hover:bg-gray-700 p-1 text-white"
                 style={{ paddingLeft: level === 0 ? 4 : undefined }}
               >
+                {/* 아이콘 출력 함수 getIcon(node.object.type, shapeType) 가 있다고 가정 */}
                 {getIcon(node.object.type, shapeType)}
-                <span>{label}</span>
-                {/* 좌표 추가 */}
-                <span className="ml-auto text-xs text-gray-300">
-                  ({left}, {top})
+                <span>
+                  {label}
+                  {node.id}
                 </span>
               </div>
-
               {node.children.length > 0 && renderTree(node.children, level + 1)}
             </li>
           );
