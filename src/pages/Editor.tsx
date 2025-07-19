@@ -266,7 +266,7 @@ export default function Editor() {
     e.dataTransfer.setData("text/plain", nodeId);
   };
 
-  // 드롭 이벤트 핸들러 예시
+  // 드롭 이벤트 핸들러
   const handleDrop =
     (targetNodeId: string, shapeType: string) => (e: React.DragEvent) => {
       e.preventDefault();
@@ -275,12 +275,13 @@ export default function Editor() {
       if (!dragOverNodeId) return;
 
       setTree((prevTree: TreeNode[]) => {
+        const combinedTree = [...prevTree, ...unlinkedNodes];
         // 이동 하는 객체
-        const draggedNode = findNodeByIdInTree(prevTree, draggedNodeId);
+        const draggedNode = findNodeByIdInTree(combinedTree, draggedNodeId);
         if (!draggedNode) return prevTree;
 
         // 이동 목적지
-        const targetNode = findNodeByIdInTree(prevTree, targetNodeId);
+        const targetNode = findNodeByIdInTree(combinedTree, targetNodeId);
         if (!targetNode) return prevTree;
 
         // 이동목적지가 layout이어야함
@@ -301,8 +302,9 @@ export default function Editor() {
             }));
         };
 
-        let newTree = removeNodeById(prevTree, draggedNodeId);
-
+        // let newTree = removeNodeById(prevTree, draggedNodeId);
+        let newTree = removeNodeById(combinedTree, draggedNodeId);
+        console.log("트리거1111111");
         // 새로운 자식 추가
         const insertNodeToParent = (
           nodes: TreeNode[],
@@ -327,9 +329,11 @@ export default function Editor() {
             }
           });
         };
+        console.log("트리거2323232323", newTree, targetNodeId, draggedNode);
 
         newTree = insertNodeToParent(newTree, targetNodeId, draggedNode);
 
+        console.log("트리거2222222222", newTree);
         return newTree;
       });
 
@@ -368,10 +372,12 @@ export default function Editor() {
 
   const unlinkedNodes: TreeNode[] = (fabricCanvas.current?.getObjects() || [])
     .filter((obj) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const id = (obj as any).customId;
       return id && !treeIds.has(id);
     })
     .map((obj) => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       id: (obj as any).customId,
       object: obj,
       children: [],
