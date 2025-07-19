@@ -134,7 +134,26 @@ export default function Editor() {
 
       fabricCanvas.current?.renderAll();
 
-      if (intersecting && collidedLayout && fabricCanvas.current) {
+      // 이미 계층인거는, layout 이동은 layers에서만 할수있도록
+      const childId = movingObj.get("customId");
+      const hasParent = (nodes: TreeNode[], childId: string): boolean => {
+        for (const node of nodes) {
+          const childExists = node.children.some(
+            (child) => child.id === childId
+          );
+          if (childExists) return true;
+
+          if (hasParent(node.children, childId)) return true;
+        }
+        return false;
+      };
+
+      if (
+        intersecting &&
+        collidedLayout &&
+        fabricCanvas.current &&
+        !hasParent(treeRef.current, childId)
+      ) {
         const canvasRect = fabricCanvas.current
           .getElement()
           .getBoundingClientRect();

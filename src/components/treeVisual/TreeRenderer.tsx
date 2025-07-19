@@ -102,7 +102,8 @@ export default function RenderTree({
             >
               {getIcon(node.object.type, shapeType)}
               <span>
-                {label} {node.id}
+                {label}
+                {/* {node.id} */}
               </span>
             </div>
 
