@@ -22,6 +22,11 @@ import {
   findNodeByIdInTree,
   moveSubtreeInTree,
 } from "../utils/tree/treeUtils";
+import {
+  handleDragLeave,
+  handleDragOver,
+  handleDragStart,
+} from "../utils/handlers/dragAndDrop";
 interface TreeNode {
   id: string; // customId
   object: fabric.Object;
@@ -260,11 +265,11 @@ export default function Editor() {
   const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
 
   // 드래그 시작 이벤트 핸들러
-  const handleDragStart = (nodeId: string) => (e: React.DragEvent) => {
-    setDraggedNodeId(nodeId);
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", nodeId);
-  };
+  // const handleDragStart = (nodeId: string) => (e: React.DragEvent) => {
+  //   setDraggedNodeId(nodeId);
+  //   e.dataTransfer.effectAllowed = "move";
+  //   e.dataTransfer.setData("text/plain", nodeId);
+  // };
 
   // 드롭 이벤트 핸들러
   const handleDrop =
@@ -343,26 +348,26 @@ export default function Editor() {
   // 드래그 오버
   const [dragOverNodeId, setDragOverNodeId] = useState<string | null>(null);
   // over 중임 => drop을 하더라도 정상동작할거
-  const handleDragOver = (nodeId: string) => (e: React.DragEvent) => {
-    e.preventDefault();
-    if (!draggedNodeId) return;
+  // const handleDragOver = (nodeId: string) => (e: React.DragEvent) => {
+  //   e.preventDefault();
+  //   if (!draggedNodeId) return;
 
-    // 자기자신 제외
-    if (nodeId === draggedNodeId) {
-      setDragOverNodeId(null);
-      return;
-    }
+  //   // 자기자신 제외
+  //   if (nodeId === draggedNodeId) {
+  //     setDragOverNodeId(null);
+  //     return;
+  //   }
 
-    setDragOverNodeId(nodeId);
-  };
+  //   setDragOverNodeId(nodeId);
+  // };
 
   // over 떠남
-  const handleDragLeave = (nodeId: string) => (e: React.DragEvent) => {
-    e.preventDefault();
-    if (dragOverNodeId === nodeId) {
-      setDragOverNodeId(null);
-    }
-  };
+  // const handleDragLeave = (nodeId: string) => (e: React.DragEvent) => {
+  //   e.preventDefault();
+  //   if (dragOverNodeId === nodeId) {
+  //     setDragOverNodeId(null);
+  //   }
+  // };
 
   const flattenTreeIds = (node: TreeNode): string[] => {
     return [node.id, ...node.children.flatMap(flattenTreeIds)];
@@ -399,10 +404,18 @@ export default function Editor() {
             <li key={node.id}>
               <div
                 draggable
-                onDragStart={handleDragStart(node.id)}
+                onDragStart={handleDragStart(node.id, setDraggedNodeId)}
                 onDrop={handleDrop(node.id, shapeType)}
-                onDragOver={handleDragOver(node.id)}
-                onDragLeave={handleDragLeave(node.id)}
+                onDragOver={handleDragOver(
+                  node.id,
+                  draggedNodeId,
+                  setDragOverNodeId
+                )}
+                onDragLeave={handleDragLeave(
+                  node.id,
+                  draggedNodeId,
+                  setDragOverNodeId
+                )}
                 className="flex items-center gap-2 cursor-pointer select-none rounded-md text-gray-100 text-sm hover:bg-gray-700 p-1 text-white"
                 style={{ paddingLeft: level === 0 ? 4 : undefined }}
               >
