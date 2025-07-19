@@ -29,6 +29,8 @@ import {
   handleDragStart,
   handleDrop,
 } from "../utils/handlers/dragAndDrop";
+import renderTree from "../components/treeVisual/TreeRenderer";
+import RenderTree from "../components/treeVisual/TreeRenderer";
 interface TreeNode {
   id: string; // customId
   object: fabric.Object;
@@ -262,89 +264,8 @@ export default function Editor() {
     fabricCanvas.current.renderAll();
   };
 
-  // 🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖🦖 드래그 로직
+  // 드래그 로직
   const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
-
-  // 드래그 시작 이벤트 핸들러
-  // const handleDragStart = (nodeId: string) => (e: React.DragEvent) => {
-  //   setDraggedNodeId(nodeId);
-  //   e.dataTransfer.effectAllowed = "move";
-  //   e.dataTransfer.setData("text/plain", nodeId);
-  // };
-
-  // 드롭 이벤트 핸들러
-  // const handleDrop =
-  //   (targetNodeId: string, shapeType: string) => (e: React.DragEvent) => {
-  //     e.preventDefault();
-  //     console.log("드랍", targetNodeId, shapeType, dragOverNodeId);
-  //     if (!draggedNodeId) return;
-  //     if (!dragOverNodeId) return;
-
-  //     setTree((prevTree: TreeNode[]) => {
-  //       const combinedTree = [...prevTree, ...unlinkedNodes];
-  //       // 이동 하는 객체
-  //       const draggedNode = findNodeByIdInTree(combinedTree, draggedNodeId);
-  //       if (!draggedNode) return prevTree;
-
-  //       // 이동 목적지
-  //       const targetNode = findNodeByIdInTree(combinedTree, targetNodeId);
-  //       if (!targetNode) return prevTree;
-
-  //       // 이동목적지가 layout이어야함
-  //       const isTargetLayout = shapeType === "layout";
-  //       console.log("이동 목적지", isTargetLayout);
-  //       if (!isTargetLayout) {
-  //         // layout이 아니면 트리 변경하지 않고 이전 상태 유지
-  //         return prevTree;
-  //       }
-
-  //       // 이동한 노드의 부모 제거
-  //       const removeNodeById = (nodes: TreeNode[], id: string): TreeNode[] => {
-  //         return nodes
-  //           .filter((node) => node.id !== id)
-  //           .map((node) => ({
-  //             ...node,
-  //             children: removeNodeById(node.children, id),
-  //           }));
-  //       };
-
-  //       // let newTree = removeNodeById(prevTree, draggedNodeId);
-  //       let newTree = removeNodeById(combinedTree, draggedNodeId);
-  //       console.log("트리거1111111");
-  //       // 새로운 자식 추가
-  //       const insertNodeToParent = (
-  //         nodes: TreeNode[],
-  //         parentId: string,
-  //         nodeToInsert: TreeNode
-  //       ): TreeNode[] => {
-  //         return nodes.map((node) => {
-  //           if (node.id === parentId) {
-  //             return {
-  //               ...node,
-  //               children: [...node.children, nodeToInsert],
-  //             };
-  //           } else {
-  //             return {
-  //               ...node,
-  //               children: insertNodeToParent(
-  //                 node.children,
-  //                 parentId,
-  //                 nodeToInsert
-  //               ),
-  //             };
-  //           }
-  //         });
-  //       };
-  //       console.log("트리거2323232323", newTree, targetNodeId, draggedNode);
-
-  //       newTree = insertNodeToParent(newTree, targetNodeId, draggedNode);
-
-  //       console.log("트리거2222222222", newTree);
-  //       return newTree;
-  //     });
-
-  //     setDraggedNodeId(null);
-  //   };
 
   // 드래그 오버
   const [dragOverNodeId, setDragOverNodeId] = useState<string | null>(null);
@@ -365,74 +286,6 @@ export default function Editor() {
       object: obj,
       children: [],
     }));
-
-  const renderTree = (nodes: TreeNode[], level = 0) => {
-    return (
-      <ul className={`${level === 0 ? "pl-0" : "pl-6"} space-y-1`}>
-        {nodes.map((node) => {
-          const shapeType = node.object.get?.("shapeType") || undefined;
-          const label =
-            (node.object as any).name ||
-            (node.object as any).label ||
-            (shapeType ?? node.object.type);
-
-          return (
-            <li key={node.id}>
-              <div
-                draggable
-                onDragStart={handleDragStart(node.id, setDraggedNodeId)}
-                onDrop={handleDrop(
-                  node.id,
-                  shapeType,
-                  dragOverNodeId,
-                  draggedNodeId,
-                  setTree,
-                  unlinkedNodes,
-                  setDraggedNodeId
-                )}
-                onDragOver={handleDragOver(
-                  node.id,
-                  draggedNodeId,
-                  setDragOverNodeId
-                )}
-                onDragLeave={handleDragLeave(
-                  node.id,
-                  draggedNodeId,
-                  setDragOverNodeId
-                )}
-                className="flex items-center gap-2 cursor-pointer select-none rounded-md text-gray-100 text-sm hover:bg-gray-700 p-1 text-white"
-                style={{ paddingLeft: level === 0 ? 4 : undefined }}
-              >
-                {getIcon(node.object.type, shapeType)}
-                <span>
-                  {label}
-                  {node.id}
-                </span>
-              </div>
-              {node.children.length > 0 && renderTree(node.children, level + 1)}
-            </li>
-          );
-        })}
-      </ul>
-    );
-  };
-
-  function getIcon(type: string, shapeType?: string) {
-    if (shapeType === "layout") {
-      return <Layers size={16} className="text-blue-400" />;
-    }
-
-    switch (type) {
-      case "rect":
-        return <Square size={16} className="text-green-400" />;
-      case "circle":
-        return <Circle size={16} className="text-pink-400" />;
-      case "triangle":
-        return <Triangle size={16} className="text-yellow-400" />;
-      default:
-        return <Layers size={16} className="text-gray-400" />;
-    }
-  }
 
   return (
     <div className="h-screen bg-gray-900 flex flex-col">
@@ -590,7 +443,25 @@ export default function Editor() {
 
                 <div className="text-sm">
                   <div className="text-sm">
-                    {renderTree([...tree, ...unlinkedNodes])}
+                    {/* <RenderTree
+                      nodes = [...tree, ...unlinkedNodes]
+                      setDraggedNodeId,
+                      dragOverNodeId,
+                      draggedNodeId,
+                      setTree,
+                      unlinkedNodes,
+                      setDragOverNodeId,
+                      // getIcon,
+                      /> */}
+                    <RenderTree
+                      nodes={[...tree, ...unlinkedNodes]}
+                      setDraggedNodeId={setDraggedNodeId}
+                      dragOverNodeId={dragOverNodeId}
+                      draggedNodeId={draggedNodeId}
+                      setTree={setTree}
+                      unlinkedNodes={unlinkedNodes}
+                      setDragOverNodeId={setDragOverNodeId}
+                    />
                   </div>
                 </div>
               </div>
