@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fabric from "fabric";
 import type { FabricObjectWithId, TreeNode } from "../../types/fabricTypes";
 
 // 🟢🟢🟢🟢🟢🟢🟢🟢 레이아웃에 추가
 export const addChildToTree = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setTree: any,
   layoutObject: fabric.Object | null,
   movingObject: fabric.Object | null
@@ -18,7 +18,6 @@ export const addChildToTree = (
     return;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setTree((prevTree: any) => {
     // 부모 찾기 함수
     const findAndInsert = (nodes: TreeNode[]): TreeNode[] => {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
 import {
@@ -26,6 +27,7 @@ import {
   handleDragLeave,
   handleDragOver,
   handleDragStart,
+  handleDrop,
 } from "../utils/handlers/dragAndDrop";
 interface TreeNode {
   id: string; // customId
@@ -61,7 +63,6 @@ export default function Editor() {
     x: number;
     y: number;
   } | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const menuTimeoutRef = useRef<any>(null);
 
   // 🍎
@@ -272,102 +273,81 @@ export default function Editor() {
   // };
 
   // 드롭 이벤트 핸들러
-  const handleDrop =
-    (targetNodeId: string, shapeType: string) => (e: React.DragEvent) => {
-      e.preventDefault();
-      console.log("드랍", targetNodeId, shapeType, dragOverNodeId);
-      if (!draggedNodeId) return;
-      if (!dragOverNodeId) return;
+  // const handleDrop =
+  //   (targetNodeId: string, shapeType: string) => (e: React.DragEvent) => {
+  //     e.preventDefault();
+  //     console.log("드랍", targetNodeId, shapeType, dragOverNodeId);
+  //     if (!draggedNodeId) return;
+  //     if (!dragOverNodeId) return;
 
-      setTree((prevTree: TreeNode[]) => {
-        const combinedTree = [...prevTree, ...unlinkedNodes];
-        // 이동 하는 객체
-        const draggedNode = findNodeByIdInTree(combinedTree, draggedNodeId);
-        if (!draggedNode) return prevTree;
+  //     setTree((prevTree: TreeNode[]) => {
+  //       const combinedTree = [...prevTree, ...unlinkedNodes];
+  //       // 이동 하는 객체
+  //       const draggedNode = findNodeByIdInTree(combinedTree, draggedNodeId);
+  //       if (!draggedNode) return prevTree;
 
-        // 이동 목적지
-        const targetNode = findNodeByIdInTree(combinedTree, targetNodeId);
-        if (!targetNode) return prevTree;
+  //       // 이동 목적지
+  //       const targetNode = findNodeByIdInTree(combinedTree, targetNodeId);
+  //       if (!targetNode) return prevTree;
 
-        // 이동목적지가 layout이어야함
-        const isTargetLayout = shapeType === "layout";
-        console.log("이동 목적지", isTargetLayout);
-        if (!isTargetLayout) {
-          // layout이 아니면 트리 변경하지 않고 이전 상태 유지
-          return prevTree;
-        }
+  //       // 이동목적지가 layout이어야함
+  //       const isTargetLayout = shapeType === "layout";
+  //       console.log("이동 목적지", isTargetLayout);
+  //       if (!isTargetLayout) {
+  //         // layout이 아니면 트리 변경하지 않고 이전 상태 유지
+  //         return prevTree;
+  //       }
 
-        // 이동한 노드의 부모 제거
-        const removeNodeById = (nodes: TreeNode[], id: string): TreeNode[] => {
-          return nodes
-            .filter((node) => node.id !== id)
-            .map((node) => ({
-              ...node,
-              children: removeNodeById(node.children, id),
-            }));
-        };
+  //       // 이동한 노드의 부모 제거
+  //       const removeNodeById = (nodes: TreeNode[], id: string): TreeNode[] => {
+  //         return nodes
+  //           .filter((node) => node.id !== id)
+  //           .map((node) => ({
+  //             ...node,
+  //             children: removeNodeById(node.children, id),
+  //           }));
+  //       };
 
-        // let newTree = removeNodeById(prevTree, draggedNodeId);
-        let newTree = removeNodeById(combinedTree, draggedNodeId);
-        console.log("트리거1111111");
-        // 새로운 자식 추가
-        const insertNodeToParent = (
-          nodes: TreeNode[],
-          parentId: string,
-          nodeToInsert: TreeNode
-        ): TreeNode[] => {
-          return nodes.map((node) => {
-            if (node.id === parentId) {
-              return {
-                ...node,
-                children: [...node.children, nodeToInsert],
-              };
-            } else {
-              return {
-                ...node,
-                children: insertNodeToParent(
-                  node.children,
-                  parentId,
-                  nodeToInsert
-                ),
-              };
-            }
-          });
-        };
-        console.log("트리거2323232323", newTree, targetNodeId, draggedNode);
+  //       // let newTree = removeNodeById(prevTree, draggedNodeId);
+  //       let newTree = removeNodeById(combinedTree, draggedNodeId);
+  //       console.log("트리거1111111");
+  //       // 새로운 자식 추가
+  //       const insertNodeToParent = (
+  //         nodes: TreeNode[],
+  //         parentId: string,
+  //         nodeToInsert: TreeNode
+  //       ): TreeNode[] => {
+  //         return nodes.map((node) => {
+  //           if (node.id === parentId) {
+  //             return {
+  //               ...node,
+  //               children: [...node.children, nodeToInsert],
+  //             };
+  //           } else {
+  //             return {
+  //               ...node,
+  //               children: insertNodeToParent(
+  //                 node.children,
+  //                 parentId,
+  //                 nodeToInsert
+  //               ),
+  //             };
+  //           }
+  //         });
+  //       };
+  //       console.log("트리거2323232323", newTree, targetNodeId, draggedNode);
 
-        newTree = insertNodeToParent(newTree, targetNodeId, draggedNode);
+  //       newTree = insertNodeToParent(newTree, targetNodeId, draggedNode);
 
-        console.log("트리거2222222222", newTree);
-        return newTree;
-      });
+  //       console.log("트리거2222222222", newTree);
+  //       return newTree;
+  //     });
 
-      setDraggedNodeId(null);
-    };
+  //     setDraggedNodeId(null);
+  //   };
 
   // 드래그 오버
   const [dragOverNodeId, setDragOverNodeId] = useState<string | null>(null);
-  // over 중임 => drop을 하더라도 정상동작할거
-  // const handleDragOver = (nodeId: string) => (e: React.DragEvent) => {
-  //   e.preventDefault();
-  //   if (!draggedNodeId) return;
-
-  //   // 자기자신 제외
-  //   if (nodeId === draggedNodeId) {
-  //     setDragOverNodeId(null);
-  //     return;
-  //   }
-
-  //   setDragOverNodeId(nodeId);
-  // };
-
-  // over 떠남
-  // const handleDragLeave = (nodeId: string) => (e: React.DragEvent) => {
-  //   e.preventDefault();
-  //   if (dragOverNodeId === nodeId) {
-  //     setDragOverNodeId(null);
-  //   }
-  // };
 
   const flattenTreeIds = (node: TreeNode): string[] => {
     return [node.id, ...node.children.flatMap(flattenTreeIds)];
@@ -377,12 +357,10 @@ export default function Editor() {
 
   const unlinkedNodes: TreeNode[] = (fabricCanvas.current?.getObjects() || [])
     .filter((obj) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const id = (obj as any).customId;
       return id && !treeIds.has(id);
     })
     .map((obj) => ({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       id: (obj as any).customId,
       object: obj,
       children: [],
@@ -394,9 +372,7 @@ export default function Editor() {
         {nodes.map((node) => {
           const shapeType = node.object.get?.("shapeType") || undefined;
           const label =
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (node.object as any).name ||
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (node.object as any).label ||
             (shapeType ?? node.object.type);
 
@@ -405,7 +381,15 @@ export default function Editor() {
               <div
                 draggable
                 onDragStart={handleDragStart(node.id, setDraggedNodeId)}
-                onDrop={handleDrop(node.id, shapeType)}
+                onDrop={handleDrop(
+                  node.id,
+                  shapeType,
+                  dragOverNodeId,
+                  draggedNodeId,
+                  setTree,
+                  unlinkedNodes,
+                  setDraggedNodeId
+                )}
                 onDragOver={handleDragOver(
                   node.id,
                   draggedNodeId,
