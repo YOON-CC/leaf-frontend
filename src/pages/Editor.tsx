@@ -360,6 +360,23 @@ export default function Editor() {
     }
   };
 
+  const flattenTreeIds = (node: TreeNode): string[] => {
+    return [node.id, ...node.children.flatMap(flattenTreeIds)];
+  };
+
+  const treeIds = new Set(tree.flatMap(flattenTreeIds));
+
+  const unlinkedNodes: TreeNode[] = (fabricCanvas.current?.getObjects() || [])
+    .filter((obj) => {
+      const id = (obj as any).customId;
+      return id && !treeIds.has(id);
+    })
+    .map((obj) => ({
+      id: (obj as any).customId,
+      object: obj,
+      children: [],
+    }));
+
   const renderTree = (nodes: TreeNode[], level = 0) => {
     return (
       <ul className={`${level === 0 ? "pl-0" : "pl-6"} space-y-1`}>
@@ -378,12 +395,11 @@ export default function Editor() {
                 draggable
                 onDragStart={handleDragStart(node.id)}
                 onDrop={handleDrop(node.id, shapeType)}
-                onDragOver={handleDragOver(node.id)} // nodeId 넘겨줌
+                onDragOver={handleDragOver(node.id)}
                 onDragLeave={handleDragLeave(node.id)}
                 className="flex items-center gap-2 cursor-pointer select-none rounded-md text-gray-100 text-sm hover:bg-gray-700 p-1 text-white"
                 style={{ paddingLeft: level === 0 ? 4 : undefined }}
               >
-                {/* 아이콘 출력 함수 getIcon(node.object.type, shapeType) 가 있다고 가정 */}
                 {getIcon(node.object.type, shapeType)}
                 <span>
                   {label}
@@ -568,14 +584,12 @@ export default function Editor() {
                 <h3 className="text-sm font-semibold text-gray-300 mb-3">
                   Layers
                 </h3>
-                {tree.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Layers size={32} className="mx-auto mb-2 text-gray-600" />
-                    <p className="text-sm">No layers yet</p>
+
+                <div className="text-sm">
+                  <div className="text-sm">
+                    {renderTree([...tree, ...unlinkedNodes])}
                   </div>
-                ) : (
-                  <div className="text-sm">{renderTree(tree)}</div>
-                )}
+                </div>
               </div>
             )}
           </div>
@@ -583,7 +597,7 @@ export default function Editor() {
 
         {/* 중앙 캔버스 영역 */}
         <div className="flex-1 flex items-center justify-center bg-gray-900 p-8">
-          <div className="bg-white rounded-lg shadow-xl">
+          <div className="bg-white shadow-xl">
             <canvas
               ref={canvasRef}
               style={{ boxShadow: "0 0 0 1px rgba(0,0,0,0.1)" }}
