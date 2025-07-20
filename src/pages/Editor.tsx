@@ -116,8 +116,28 @@ export default function Editor() {
       let intersecting = false;
       let collidedLayout: fabric.Rect | null = null;
 
+      const isDescendant = (
+        parentNode: TreeNode,
+        targetId: string
+      ): boolean => {
+        if (!parentNode) return false;
+
+        return parentNode.children.some(
+          (child) => child.id === targetId || isDescendant(child, targetId)
+        );
+      };
+
       layoutListRef.current.forEach((layout) => {
+        // 자신 제외
         if (movingObj === layout) return;
+
+        // 이쪽에서, 부모의 노드가, 자식의 노드로 들어가는 상황을 방지
+        const movingId = movingObj.get("customId");
+        const movingNode = findNodeByIdInTree(treeRef.current, movingId);
+        const layoutId = layout.get("customId");
+        if (movingNode && isDescendant(movingNode, layoutId)) {
+          return;
+        }
 
         if (movingObj.intersectsWithObject(layout)) {
           layout.set("fill", "rgba(0, 145, 255, 0.1)");
@@ -155,7 +175,6 @@ export default function Editor() {
         fabricCanvas.current &&
         !hasParent(treeRef.current, childId)
       ) {
-        // 이쪽에서, 부모의 노드가, 자식의 노드로 들어가는 상황을 방지
         const canvasRect = fabricCanvas.current
           .getElement()
           .getBoundingClientRect();
