@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { TreeNode } from "../../types/fabricTypes";
-import { findNodeByIdInTree } from "../tree/treeUtils";
+import { findNodeByIdInTree, isDescendant } from "../tree/treeUtils";
 
 // 드래그 시작
 export const handleDragStart =
@@ -71,18 +71,6 @@ export const handleDrop =
         // layout이 아니면 트리 변경하지 않고 이전 상태 유지
         return prevTree;
       }
-
-      // 🔒🔒🔒🔒🔒🔒🔒🔒🔒 순환 방지 체크
-      const isDescendant = (
-        parentNode: TreeNode,
-        targetId: string
-      ): boolean => {
-        if (!parentNode) return false;
-
-        return parentNode.children.some(
-          (child) => child.id === targetId || isDescendant(child, targetId)
-        );
-      };
 
       const bothAreLayouts =
         shapeType === "layout" &&

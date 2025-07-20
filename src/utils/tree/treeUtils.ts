@@ -97,3 +97,15 @@ export function moveSubtreeInTree(node: TreeNode, dx: number, dy: number) {
     moveSubtreeInTree(child, dx, dy);
   });
 }
+
+// 🟢🟢🟢🟢🟢🟢🟢🟢 특정 노드가 본인의 하위인지 체크
+export const isDescendant = (
+  parentNode: TreeNode,
+  targetId: string
+): boolean => {
+  if (!parentNode) return false;
+
+  return parentNode.children.some(
+    (child) => child.id === targetId || isDescendant(child, targetId)
+  );
+};

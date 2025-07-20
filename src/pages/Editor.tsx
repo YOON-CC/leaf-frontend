@@ -21,6 +21,7 @@ import { createShape } from "../utils/fabric/createShape";
 import {
   addChildToTree,
   findNodeByIdInTree,
+  isDescendant,
   moveSubtreeInTree,
 } from "../utils/tree/treeUtils";
 
@@ -115,17 +116,6 @@ export default function Editor() {
 
       let intersecting = false;
       let collidedLayout: fabric.Rect | null = null;
-
-      const isDescendant = (
-        parentNode: TreeNode,
-        targetId: string
-      ): boolean => {
-        if (!parentNode) return false;
-
-        return parentNode.children.some(
-          (child) => child.id === targetId || isDescendant(child, targetId)
-        );
-      };
 
       layoutListRef.current.forEach((layout) => {
         // 자신 제외
