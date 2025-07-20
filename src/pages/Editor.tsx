@@ -136,6 +136,7 @@ export default function Editor() {
 
       // 이미 계층인거는, layout 이동은 layers에서만 할수있도록
       const childId = movingObj.get("customId");
+
       const hasParent = (nodes: TreeNode[], childId: string): boolean => {
         for (const node of nodes) {
           const childExists = node.children.some(
@@ -154,6 +155,7 @@ export default function Editor() {
         fabricCanvas.current &&
         !hasParent(treeRef.current, childId)
       ) {
+        // 이쪽에서, 부모의 노드가, 자식의 노드로 들어가는 상황을 방지
         const canvasRect = fabricCanvas.current
           .getElement()
           .getBoundingClientRect();

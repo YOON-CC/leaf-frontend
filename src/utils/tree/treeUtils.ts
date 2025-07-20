@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fabric from "fabric";
 import type { FabricObjectWithId, TreeNode } from "../../types/fabricTypes";
 
 // 🟢🟢🟢🟢🟢🟢🟢🟢 레이아웃에 추가
 export const addChildToTree = (
-  setTree: any,
+  setTree: React.Dispatch<React.SetStateAction<TreeNode[]>>,
   layoutObject: fabric.Object | null,
   movingObject: fabric.Object | null
 ) => {
@@ -18,53 +17,47 @@ export const addChildToTree = (
     return;
   }
 
-  setTree((prevTree: any) => {
-    // 부모 찾기 함수
-    const findAndInsert = (nodes: TreeNode[]): TreeNode[] => {
-      return nodes.map((node) => {
-        if (node.id === parentId) {
-          return {
-            ...node,
-            children: [
-              ...node.children,
-              {
-                id: childId,
-                object: movingObject,
-                children: [],
-              },
-            ],
-          };
-        } else {
-          return {
-            ...node,
-            children: findAndInsert(node.children),
-          };
-        }
-      });
+  setTree((prevTree) => {
+    let movingNode: TreeNode = {
+      id: childId,
+      object: movingObject,
+      children: [],
     };
 
-    // 부모가 기존 트리에 있을 때
-    const newTree = findAndInsert(prevTree);
+    // movingNode를 트리에서 잘라내기
+    const removeNode = (nodes: TreeNode[]): TreeNode[] =>
+      nodes
+        .map((node) => {
+          if (node.id === childId) {
+            movingNode = node; // 기존 자식까지 유지
+            return null;
+          }
+          return { ...node, children: removeNode(node.children) };
+        })
+        .filter(Boolean) as TreeNode[];
 
-    // 부모가 트리에 없으면 새로 추가
-    const parentExists = JSON.stringify(newTree) !== JSON.stringify(prevTree);
-    if (parentExists) return newTree;
+    const updatedTree = removeNode(prevTree);
 
-    // 새로운 부모 노드를 만들어서 추가
-    return [
-      ...prevTree,
-      {
-        id: parentId,
-        object: layoutObject,
-        children: [
+    // parentId를 찾아서 자식으로 넣기
+    const insertNode = (nodes: TreeNode[]): TreeNode[] =>
+      nodes.map((node) =>
+        node.id === parentId
+          ? { ...node, children: [...node.children, movingNode] }
+          : { ...node, children: insertNode(node.children) }
+      );
+
+    const parentExists = JSON.stringify(updatedTree).includes(parentId);
+
+    return parentExists
+      ? insertNode(updatedTree)
+      : [
+          ...updatedTree,
           {
-            id: childId,
-            object: movingObject,
-            children: [],
+            id: parentId,
+            object: layoutObject,
+            children: [movingNode],
           },
-        ],
-      },
-    ];
+        ];
   });
 };
 
