@@ -72,6 +72,26 @@ export const handleDrop =
         return prevTree;
       }
 
+      // 🔒🔒🔒🔒🔒🔒🔒🔒🔒 순환 방지 체크
+      const isDescendant = (
+        parentNode: TreeNode,
+        targetId: string
+      ): boolean => {
+        if (!parentNode) return false;
+
+        return parentNode.children.some(
+          (child) => child.id === targetId || isDescendant(child, targetId)
+        );
+      };
+
+      const bothAreLayouts =
+        shapeType === "layout" &&
+        draggedNode.object.get("shapeType") === "layout";
+
+      if (bothAreLayouts && isDescendant(draggedNode, targetNodeId)) {
+        return prevTree;
+      }
+
       // 이동한 노드의 부모 제거
       const removeNodeById = (nodes: TreeNode[], id: string): TreeNode[] => {
         return nodes
