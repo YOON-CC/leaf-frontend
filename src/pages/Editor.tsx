@@ -26,6 +26,7 @@ import {
 } from "../utils/tree/treeUtils";
 
 import RenderTree from "../components/treeVisual/TreeRenderer";
+import { treeToCode } from "../utils/export/treeToCode";
 interface TreeNode {
   id: string; // customId
   object: fabric.Object;
@@ -309,8 +310,8 @@ export default function Editor() {
               <button
                 onClick={() => {
                   if (!fabricCanvas.current) return;
-                  const objects = fabricCanvas.current.getObjects();
-                  console.log("Canvas Objects:", objects);
+                  const code = treeToCode(treeRef.current);
+                  console.log(code);
                 }}
                 className="px-3 py-1.5 bg-gray-700 text-gray-200 rounded-md hover:bg-gray-600 transition-colors text-sm flex items-center space-x-1"
               >
