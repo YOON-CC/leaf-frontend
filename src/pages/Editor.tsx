@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as fabric from "fabric";
 import {
   Circle,
@@ -289,6 +289,26 @@ export default function Editor() {
     fabricCanvas.current.renderAll();
   };
 
+  // 나중에 export 할때 계층 아닌것도 포함할거임 ㅇㅇ
+  const flattenTreeIds = (node: TreeNode): string[] => {
+    return [node.id, ...node.children.flatMap(flattenTreeIds)];
+  };
+  const treeIds = new Set(tree.flatMap(flattenTreeIds));
+
+  const unlinkedNodes: TreeNode[] = (() => {
+    if (!fabricCanvas.current) return [];
+    return (fabricCanvas.current.getObjects() || [])
+      .filter((obj: any) => {
+        const id = (obj as any).customId;
+        return id && !treeIds.has(id);
+      })
+      .map((obj: any) => ({
+        id: (obj as any).customId,
+        object: obj,
+        children: [],
+      }));
+  })();
+
   return (
     <div className="h-screen bg-gray-900 flex flex-col">
       {/* 상단 툴바 */}
@@ -310,7 +330,11 @@ export default function Editor() {
               <button
                 onClick={() => {
                   if (!fabricCanvas.current) return;
-                  const code = treeToCode(treeRef.current);
+                  const code = treeToCode([
+                    ...treeRef.current,
+                    ...unlinkedNodes,
+                  ]);
+
                   console.log(code);
                 }}
                 className="px-3 py-1.5 bg-gray-700 text-gray-200 rounded-md hover:bg-gray-600 transition-colors text-sm flex items-center space-x-1"
