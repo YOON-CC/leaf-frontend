@@ -65,7 +65,7 @@ export default function RenderTree({
   }
 
   const render = (nodes: TreeNode[], level = 0) => (
-    <ul className={`${level === 0 ? "pl-0" : "pl-6"} space-y-1`}>
+    <ul className={`${level === 0 ? "pl-0" : "pl-4"} space-y-1`}>
       {nodes.map((node) => {
         const shapeType = node.object.get?.("shapeType") || undefined;
         const label =
@@ -73,6 +73,14 @@ export default function RenderTree({
           (node.object as any).label ||
           (shapeType ?? node.object.type);
 
+        // 드래그 오버 효과
+        const isDragOver = node.id === dragOverNodeId;
+        const isLayout = shapeType === "layout";
+        const bgColor =
+          isDragOver && isLayout && draggedNodeId !== null
+            ? "bg-[#999999]"
+            : "hover:bg-gray-700";
+        // console.log("✅✅✅", draggedNodeId, dragOverNodeId);
         return (
           <li key={node.id}>
             <div
@@ -97,7 +105,7 @@ export default function RenderTree({
                 draggedNodeId,
                 setDragOverNodeId
               )}
-              className="flex items-center gap-2 cursor-pointer select-none rounded-md text-gray-100 text-sm hover:bg-gray-700 p-1 text-white"
+              className={`flex items-center gap-2 cursor-pointer select-none rounded-md text-sm p-1 text-white ${bgColor}`}
               style={{ paddingLeft: level === 0 ? 4 : undefined }}
             >
               {getIcon(node.object.type, shapeType)}
