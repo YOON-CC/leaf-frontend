@@ -27,6 +27,7 @@ import {
 
 import RenderTree from "../components/treeVisual/TreeRenderer";
 import { treeToCode } from "../utils/export/treeToCode";
+import { getCombinedTree } from "../utils/export/getCombinedTree";
 interface TreeNode {
   id: string; // customId
   object: fabric.Object;
@@ -290,24 +291,9 @@ export default function Editor() {
   };
 
   // 나중에 export 할때 계층 아닌것도 포함할거임 ㅇㅇ
-  const flattenTreeIds = (node: TreeNode): string[] => {
-    return [node.id, ...node.children.flatMap(flattenTreeIds)];
-  };
-  const treeIds = new Set(tree.flatMap(flattenTreeIds));
-
-  const unlinkedNodes: TreeNode[] = (() => {
-    if (!fabricCanvas.current) return [];
-    return (fabricCanvas.current.getObjects() || [])
-      .filter((obj: any) => {
-        const id = (obj as any).customId;
-        return id && !treeIds.has(id);
-      })
-      .map((obj: any) => ({
-        id: (obj as any).customId,
-        object: obj,
-        children: [],
-      }));
-  })();
+  const combinedTree = fabricCanvas.current
+    ? getCombinedTree(fabricCanvas.current, tree, "combined")
+    : [];
 
   return (
     <div className="h-screen bg-gray-900 flex flex-col">
@@ -330,10 +316,7 @@ export default function Editor() {
               <button
                 onClick={() => {
                   if (!fabricCanvas.current) return;
-                  const code = treeToCode([
-                    ...treeRef.current,
-                    ...unlinkedNodes,
-                  ]);
+                  const code = treeToCode(combinedTree);
 
                   console.log(code);
                 }}

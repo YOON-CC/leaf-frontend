@@ -8,6 +8,7 @@ import {
   handleDragStart,
   handleDrop,
 } from "../../utils/handlers/dragAndDrop";
+import { getCombinedTree } from "../../utils/export/getCombinedTree";
 
 type RenderTreeProps = {
   tree: TreeNode[];
@@ -23,29 +24,17 @@ export default function RenderTree({
   const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
   const [dragOverNodeId, setDragOverNodeId] = useState<string | null>(null);
 
-  // 트리 flatten
-  const flattenTreeIds = (node: TreeNode): string[] => {
-    return [node.id, ...node.children.flatMap(flattenTreeIds)];
-  };
+  // 캔버스 전체
+  const combinedTree = useMemo(
+    () => getCombinedTree(fabricCanvas, tree, "combined"),
+    [fabricCanvas, tree]
+  );
 
-  const treeIds = useMemo(() => new Set(tree.flatMap(flattenTreeIds)), [tree]);
-
-  // unlinkedNodes 계산
-  const unlinkedNodes: TreeNode[] = useMemo(() => {
-    if (!fabricCanvas) return [];
-    return (fabricCanvas.getObjects() || [])
-      .filter((obj: any) => {
-        const id = (obj as any).customId;
-        return id && !treeIds.has(id);
-      })
-      .map((obj: any) => ({
-        id: (obj as any).customId,
-        object: obj,
-        children: [],
-      }));
-  }, [fabricCanvas, treeIds]);
-
-  const combinedTree = [...tree, ...unlinkedNodes];
+  // unlinkedNodes
+  const unlinkedNodes = useMemo(
+    () => getCombinedTree(fabricCanvas, tree, "unlinked"),
+    [fabricCanvas, tree]
+  );
 
   function getIcon(type: string, shapeType?: string) {
     if (shapeType === "layout") {
