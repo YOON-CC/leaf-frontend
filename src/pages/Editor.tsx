@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
 import {
   Circle,
@@ -77,13 +77,21 @@ export default function Editor() {
     fabricCanvas.current.on("selection:created", (e) => {
       const selected = e.selected[0];
       setSelectedObject(selected);
-      updatePropertiesFromObject(selected);
+      syncObjectToState(selected, setObjectProperties);
     });
 
     fabricCanvas.current.on("selection:updated", (e) => {
       const selected = e.selected[0];
       setSelectedObject(selected);
-      updatePropertiesFromObject(selected);
+      syncObjectToState(selected, setObjectProperties);
+    });
+
+    // 도형 스케일 적용
+    fabricCanvas.current.on("object:scaling", (e) => {
+      const obj = e.target;
+      if (!obj) return;
+
+      syncObjectToState(obj, setObjectProperties);
     });
 
     fabricCanvas.current.on("selection:cleared", () => {
@@ -232,17 +240,33 @@ export default function Editor() {
   // console.log(tree);
 
   // 🍎
-  const updatePropertiesFromObject = (obj: fabric.Object) => {
-    setObjectProperties({
+  const syncObjectToState = (
+    obj: fabric.Object,
+    setProps: React.Dispatch<React.SetStateAction<any>>
+  ) => {
+    const actualWidth = obj.width! * obj.scaleX!;
+    const actualHeight = obj.height! * obj.scaleY!;
+
+    setProps({
       fill: (obj.fill as string) || "#ff0000",
       strokeWidth: obj.strokeWidth || 0,
       stroke: (obj.stroke as string) || "#000000",
       opacity: obj.opacity || 1,
       angle: obj.angle || 0,
-      scaleX: obj.scaleX || 1,
-      scaleY: obj.scaleY || 1,
+      width: actualWidth,
+      height: actualHeight,
+      scaleX: 1,
+      scaleY: 1,
+    });
+
+    obj.set({
+      width: actualWidth,
+      height: actualHeight,
+      scaleX: 1,
+      scaleY: 1,
     });
   };
+
   const layoutListRef = useRef<fabric.Rect[]>([]);
 
   const addShape = (type: string) => {
@@ -620,48 +644,6 @@ export default function Editor() {
                       }
                       className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
                     />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-400">Scale X</span>
-                        <span className="text-sm text-gray-300">
-                          {objectProperties.scaleX.toFixed(1)}
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0.1"
-                        max="3"
-                        step="0.1"
-                        value={objectProperties.scaleX}
-                        onChange={(e) =>
-                          updateProperty("scaleX", parseFloat(e.target.value))
-                        }
-                        className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-400">Scale Y</span>
-                        <span className="text-sm text-gray-300">
-                          {objectProperties.scaleY.toFixed(1)}
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0.1"
-                        max="3"
-                        step="0.1"
-                        value={objectProperties.scaleY}
-                        onChange={(e) =>
-                          updateProperty("scaleY", parseFloat(e.target.value))
-                        }
-                        className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
-                      />
-                    </div>
                   </div>
                 </div>
               </div>
