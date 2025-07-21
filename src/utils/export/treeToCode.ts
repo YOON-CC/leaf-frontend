@@ -16,8 +16,30 @@ export const treeToCode = (nodes: TreeNode[], indent = 0): string => {
       const fill = (node.object as any).fill || "transparent";
       const stroke = (node.object as any).stroke || "none";
 
-      const style = `width:${width}px; height:${height}px; background-color:${fill}; border: 1px solid ${stroke};`;
-      console.log("✅✅", style);
+      // const left = (node.object as any).left || 0;
+      // const top = (node.object as any).top || 0;
+
+      // const style = `
+      //   position: absolute;
+      //   width: ${width}px;
+      //   height: ${height}px;
+      //   background-color: ${fill};
+      //   border: 1px solid ${stroke};
+      //   left: ${left}px;
+      //   top: ${top}px;
+      // `
+      //   .trim()
+      //   .replace(/\s+/g, " ");
+
+      const style = `
+        position: absolute;
+        width: ${width}px;
+        height: ${height}px;
+        background-color: ${fill};
+        border: 1px solid ${stroke};
+      `
+        .trim()
+        .replace(/\s+/g, " ");
       const divStart = `${indentSpace}<div id="${id}" style="${style}">`;
       const divLabel = `${indentSpace}  ${label}`;
 
