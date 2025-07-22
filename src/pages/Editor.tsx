@@ -490,7 +490,7 @@ export default function Editor() {
                 onClick={() => {
                   if (!fabricCanvas.current) return;
                   const code = treeToCode(combinedTree);
-
+                  console.log(code);
                   setExportFile(
                     `
                     <!DOCTYPE html>
