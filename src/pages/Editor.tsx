@@ -319,6 +319,24 @@ export default function Editor() {
     ? getCombinedTree(fabricCanvas.current, tree, "combined")
     : [];
 
+  
+  // 파일 다운로드 로직
+  const [exportFile, setExportFile] = useState('')
+  useEffect(() => {
+    if (exportFile === "") return;
+
+    const blob = new Blob([exportFile], { type: "text/html" });
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "test.html"; 
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [exportFile]);
+
   return (
     <div className="h-screen bg-gray-900 flex flex-col">
       {/* 상단 툴바 */}
@@ -342,7 +360,29 @@ export default function Editor() {
                   if (!fabricCanvas.current) return;
                   const code = treeToCode(combinedTree);
 
-                  console.log(code);
+                  setExportFile(
+                    `
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                      <meta charset="UTF-8" />
+                      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                      <title>Exported Tree</title>
+                      <style>
+                        body {
+                          position: relative;
+                          width: 100%;
+                          height: 100vh;
+                          margin: 0;
+                        }
+                      </style>
+                    </head>
+                    <body>
+                    ${code}
+                    </body>
+                    </html>
+                    `
+                  );
                 }}
                 className="px-3 py-1.5 bg-gray-700 text-gray-200 rounded-md hover:bg-gray-600 transition-colors text-sm flex items-center space-x-1"
               >

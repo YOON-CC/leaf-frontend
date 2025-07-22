@@ -16,20 +16,13 @@ export const treeToCode = (nodes: TreeNode[], indent = 0): string => {
       const fill = (node.object as any).fill || "transparent";
       const stroke = (node.object as any).stroke || "none";
 
-      // const left = (node.object as any).left || 0;
-      // const top = (node.object as any).top || 0;
+      const left = (node.object as any).left || 0;
+      const top = (node.object as any).top || 0;
+      // left, top은 지금 임시고, 
+      // 이거 나중에 mt, ml, mr,mb,
+      // flex, justify-center,justify-between, items-center 필요하고
+      // 위의 요소가 적용되면, 이후 세부 움직임은, margin으로 가져가야할듯 ㅇㅇ
 
-      // const style = `
-      //   position: absolute;
-      //   width: ${width}px;
-      //   height: ${height}px;
-      //   background-color: ${fill};
-      //   border: 1px solid ${stroke};
-      //   left: ${left}px;
-      //   top: ${top}px;
-      // `
-      //   .trim()
-      //   .replace(/\s+/g, " ");
 
       const style = `
         position: absolute;
@@ -37,9 +30,13 @@ export const treeToCode = (nodes: TreeNode[], indent = 0): string => {
         height: ${height}px;
         background-color: ${fill};
         border: 1px solid ${stroke};
+        left: ${left}px;
+        top: ${top}px;
       `
         .trim()
         .replace(/\s+/g, " ");
+
+
       const divStart = `${indentSpace}<div id="${id}" style="${style}">`;
       const divLabel = `${indentSpace}  ${label}`;
 
@@ -49,7 +46,7 @@ export const treeToCode = (nodes: TreeNode[], indent = 0): string => {
       }
 
       const divEnd = `${indentSpace}</div>`;
-
+      
       return [divStart, divLabel, childrenCode, divEnd].join("\n");
     })
     .join("\n");
