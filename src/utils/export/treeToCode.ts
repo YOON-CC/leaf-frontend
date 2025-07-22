@@ -29,7 +29,7 @@ export const treeToCode = (nodes: TreeNode[], indent = 0): string => {
       console.log(alignSelf, justifyChildren, itemsChildren);
 
       const style = `
-        position: absolute;
+        position: relative;
         width: ${width}px;
         height: ${height}px;
         background-color: ${fill};

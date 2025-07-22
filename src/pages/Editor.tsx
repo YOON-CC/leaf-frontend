@@ -337,24 +337,135 @@ export default function Editor() {
   }, [exportFile]);
 
   // 정렬
-  const handleSelfAlign = (align: any) => {
+  const handleSelfAlign = (pos: any, fabricCanvas: any, tree: TreeNode[]) => {
     if (!fabricCanvas.current) return;
-    const activeObject = fabricCanvas.current.getActiveObject();
-    if (!activeObject) return;
 
-    activeObject.set("alignSelf", align);
-    fabricCanvas.current.requestRenderAll();
+    const canvas = fabricCanvas.current;
+    const activeObject = canvas.getActiveObject();
+
+    if (!activeObject) {
+      alert("도형을 선택하세요.");
+      return;
+    }
+
+    const findParentNode = (
+      nodes: TreeNode[],
+      childId: string,
+      parent: TreeNode | null = null
+    ): TreeNode | null => {
+      for (const node of nodes) {
+        if (node.id === childId) return parent;
+        const found = findParentNode(node.children, childId, node);
+        if (found) return found;
+      }
+      return null;
+    };
+
+    const activeId =
+      (activeObject as any).customId ?? activeObject?.toObject()?.id;
+
+    const parentNode = findParentNode(tree, activeId);
+
+    // 1) 위치 계산 (새로운 left 값)
+    const calculateNewLeft = (
+      pos: "left" | "center" | "right",
+      containerLeft: number,
+      containerWidth: number,
+      objectWidth: number
+    ): number => {
+      switch (pos) {
+        case "left":
+          return containerLeft;
+        case "center":
+          return containerLeft + (containerWidth - objectWidth) / 2;
+        case "right":
+          return containerLeft + containerWidth - objectWidth;
+        default:
+          return containerLeft;
+      }
+    };
+
+    // 2) 선택 도형이 레이아웃인지 확인
+    const shapeType = activeObject.get?.("shapeType") || activeObject.type;
+    const isLayout = shapeType === "layout";
+
+    if (!parentNode) {
+      // 부모 없으면 캔버스 기준 정렬
+      const canvasWidth = canvas.getWidth();
+      const objectWidth = activeObject.getScaledWidth();
+      const newLeft = calculateNewLeft(pos, 0, canvasWidth, objectWidth);
+
+      // 만약 선택 도형이 layout이면 자식도 이동
+      if (isLayout) {
+        moveChildren(tree, activeObject, newLeft - (activeObject.left ?? 0));
+      }
+
+      activeObject.set({ left: newLeft });
+    } else {
+      // 부모 기준 정렬
+      const parentObject = parentNode.object;
+      const parentLeft = parentObject.left ?? 0;
+      const parentWidth = parentObject.getScaledWidth();
+
+      const objectWidth = activeObject.getScaledWidth();
+      const newLeft = calculateNewLeft(
+        pos,
+        parentLeft,
+        parentWidth,
+        objectWidth
+      );
+
+      if (isLayout) {
+        moveChildren(tree, activeObject, newLeft - (activeObject.left ?? 0));
+      }
+
+      activeObject.set({ left: newLeft });
+    }
+
+    activeObject.setCoords();
+    canvas.requestRenderAll();
   };
 
-  const handleChildrenAlign = (justify: any) => {
-    if (!fabricCanvas.current) return;
+  // 자식 도형들 위치 이동 함수 (x축 이동량 만큼 좌표 이동)
+  const moveChildren = (
+    tree: TreeNode[],
+    parentObject: fabric.Object,
+    deltaX: number
+  ) => {
+    // 부모 노드 id
+    const parentId =
+      (parentObject as any).customId ?? parentObject?.toObject()?.id;
+    if (!parentId) return;
 
-    const activeObject = fabricCanvas.current.getActiveObject();
-    if (!activeObject) return;
+    // 재귀로 자식 노드 찾고 이동
+    const findAndMove = (nodes: TreeNode[]) => {
+      for (const node of nodes) {
+        if (node.id === parentId) {
+          // 이 노드의 자식들을 이동시킨다.
+          moveNodeChildren(node.children, deltaX);
+          break;
+        } else {
+          findAndMove(node.children);
+        }
+      }
+    };
 
-    activeObject.set("justifyChildren", justify);
-    activeObject.set("itemsChildren", "center");
-    fabricCanvas.current.requestRenderAll();
+    const moveNodeChildren = (children: TreeNode[], deltaX: number) => {
+      children.forEach((child) => {
+        const obj = child.object;
+        if (!obj) return;
+        const oldLeft = obj.left ?? 0;
+        obj.set({ left: oldLeft + deltaX });
+        obj.setCoords();
+
+        // 자식이 더 있으면 재귀 이동
+        if (child.children.length > 0) {
+          moveNodeChildren(child.children, deltaX);
+        }
+      });
+    };
+
+    findAndMove(tree);
   };
 
   return (
@@ -710,43 +821,24 @@ export default function Editor() {
                 {/* Array */}
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium text-gray-300">Array</h3>
-
                   <div className="space-y-3">
                     {/* Self Array */}
                     <div>
                       <span className="text-sm text-gray-400 block mb-2">
-                        Self Array
+                        Self Align
                       </span>
                       <div className="flex gap-2">
                         {["left", "center", "right"].map((pos) => (
                           <button
                             key={pos}
-                            onClick={() => handleSelfAlign(pos)}
+                            onClick={() =>
+                              handleSelfAlign(pos, fabricCanvas, tree)
+                            }
                             className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded-md text-sm text-gray-200 transition-all"
                           >
                             {pos}
                           </button>
                         ))}
-                      </div>
-                    </div>
-
-                    {/* Children Array */}
-                    <div>
-                      <span className="text-sm text-gray-400 block mb-2">
-                        Children Array
-                      </span>
-                      <div className="flex gap-2">
-                        {["space-between", "space-evenly", "center"].map(
-                          (pos) => (
-                            <button
-                              key={pos}
-                              onClick={() => handleChildrenAlign(pos)}
-                              className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded-md text-sm text-gray-200 transition-all"
-                            >
-                              {pos}
-                            </button>
-                          )
-                        )}
                       </div>
                     </div>
                   </div>
