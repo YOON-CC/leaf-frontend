@@ -319,9 +319,8 @@ export default function Editor() {
     ? getCombinedTree(fabricCanvas.current, tree, "combined")
     : [];
 
-  
   // 파일 다운로드 로직
-  const [exportFile, setExportFile] = useState('')
+  const [exportFile, setExportFile] = useState("");
   useEffect(() => {
     if (exportFile === "") return;
 
@@ -330,12 +329,33 @@ export default function Editor() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "test.html"; 
+    a.download = "test.html";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, [exportFile]);
+
+  // 정렬
+  const handleSelfAlign = (align: any) => {
+    if (!fabricCanvas.current) return;
+    const activeObject = fabricCanvas.current.getActiveObject();
+    if (!activeObject) return;
+
+    activeObject.set("alignSelf", align);
+    fabricCanvas.current.requestRenderAll();
+  };
+
+  const handleChildrenAlign = (justify: any) => {
+    if (!fabricCanvas.current) return;
+
+    const activeObject = fabricCanvas.current.getActiveObject();
+    if (!activeObject) return;
+
+    activeObject.set("justifyChildren", justify);
+    activeObject.set("itemsChildren", "center");
+    fabricCanvas.current.requestRenderAll();
+  };
 
   return (
     <div className="h-screen bg-gray-900 flex flex-col">
@@ -684,6 +704,51 @@ export default function Editor() {
                       }
                       className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
                     />
+                  </div>
+                </div>
+
+                {/* Array */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-gray-300">Array</h3>
+
+                  <div className="space-y-2">
+                    {/* 자신*/}
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-400">Self Array</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <button onClick={() => handleSelfAlign("left")}>
+                        왼쪽
+                      </button>
+                      <button onClick={() => handleSelfAlign("center")}>
+                        가운데
+                      </button>
+                      <button onClick={() => handleSelfAlign("right")}>
+                        오른쪽
+                      </button>
+                    </div>
+
+                    {/* 하위 */}
+                    <div className="flex items-center justify-between mt-4">
+                      <span className="text-sm text-gray-400">
+                        Children Array
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={() => handleChildrenAlign("space-between")}
+                      >
+                        space-between
+                      </button>
+                      <button
+                        onClick={() => handleChildrenAlign("space-evenly")}
+                      >
+                        space-evenly
+                      </button>
+                      <button onClick={() => handleChildrenAlign("center")}>
+                        center
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

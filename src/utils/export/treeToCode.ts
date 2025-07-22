@@ -18,11 +18,15 @@ export const treeToCode = (nodes: TreeNode[], indent = 0): string => {
 
       const left = (node.object as any).left || 0;
       const top = (node.object as any).top || 0;
-      // left, top은 지금 임시고, 
+      // left, top은 지금 임시고,
       // 이거 나중에 mt, ml, mr,mb,
       // flex, justify-center,justify-between, items-center 필요하고
       // 위의 요소가 적용되면, 이후 세부 움직임은, margin으로 가져가야할듯 ㅇㅇ
-
+      // ✅ 정렬 속성 가져오기 (fabric.Object에 저장해둔 값)
+      const alignSelf = (node.object as any).alignSelf || "none";
+      const justifyChildren = (node.object as any).justifyChildren || "none";
+      const itemsChildren = (node.object as any).itemsChildren || "center";
+      console.log(alignSelf, justifyChildren, itemsChildren);
 
       const style = `
         position: absolute;
@@ -36,7 +40,6 @@ export const treeToCode = (nodes: TreeNode[], indent = 0): string => {
         .trim()
         .replace(/\s+/g, " ");
 
-
       const divStart = `${indentSpace}<div id="${id}" style="${style}">`;
       const divLabel = `${indentSpace}  ${label}`;
 
@@ -46,7 +49,7 @@ export const treeToCode = (nodes: TreeNode[], indent = 0): string => {
       }
 
       const divEnd = `${indentSpace}</div>`;
-      
+
       return [divStart, divLabel, childrenCode, divEnd].join("\n");
     })
     .join("\n");
