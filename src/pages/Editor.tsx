@@ -711,43 +711,43 @@ export default function Editor() {
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium text-gray-300">Array</h3>
 
-                  <div className="space-y-2">
-                    {/* 자신*/}
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-400">Self Array</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <button onClick={() => handleSelfAlign("left")}>
-                        왼쪽
-                      </button>
-                      <button onClick={() => handleSelfAlign("center")}>
-                        가운데
-                      </button>
-                      <button onClick={() => handleSelfAlign("right")}>
-                        오른쪽
-                      </button>
+                  <div className="space-y-3">
+                    {/* Self Array */}
+                    <div>
+                      <span className="text-sm text-gray-400 block mb-2">
+                        Self Array
+                      </span>
+                      <div className="flex gap-2">
+                        {["left", "center", "right"].map((pos) => (
+                          <button
+                            key={pos}
+                            onClick={() => handleSelfAlign(pos)}
+                            className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded-md text-sm text-gray-200 transition-all"
+                          >
+                            {pos}
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
-                    {/* 하위 */}
-                    <div className="flex items-center justify-between mt-4">
-                      <span className="text-sm text-gray-400">
+                    {/* Children Array */}
+                    <div>
+                      <span className="text-sm text-gray-400 block mb-2">
                         Children Array
                       </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <button
-                        onClick={() => handleChildrenAlign("space-between")}
-                      >
-                        space-between
-                      </button>
-                      <button
-                        onClick={() => handleChildrenAlign("space-evenly")}
-                      >
-                        space-evenly
-                      </button>
-                      <button onClick={() => handleChildrenAlign("center")}>
-                        center
-                      </button>
+                      <div className="flex gap-2">
+                        {["space-between", "space-evenly", "center"].map(
+                          (pos) => (
+                            <button
+                              key={pos}
+                              onClick={() => handleChildrenAlign(pos)}
+                              className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded-md text-sm text-gray-200 transition-all"
+                            >
+                              {pos}
+                            </button>
+                          )
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
