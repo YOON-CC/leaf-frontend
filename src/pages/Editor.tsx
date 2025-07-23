@@ -325,8 +325,9 @@ export default function Editor() {
   // ? getCombinedTree(fabricCanvas.current, tree, "tree")
   // : [];
   
+
   // 파일 다운로드 로직
-  const [exportFile, setExportFile] = useState('')
+  const [exportFile, setExportFile] = useState("");
   useEffect(() => {
     if (exportFile === "") return;
     console.log(exportFile)
@@ -335,14 +336,14 @@ export default function Editor() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "test.html"; 
+    a.download = "test.html";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, [exportFile]);
 
-// 정렬
+  // 정렬
   const handleSelfAlign = (pos: any, fabricCanvas: any, tree: TreeNode[]) => {
     if (!fabricCanvas.current) return;
 
@@ -473,7 +474,7 @@ export default function Editor() {
 
     findAndMove(tree);
   };
-  
+
   return (
     <div className="h-screen bg-gray-900 flex flex-col">
       {/* 상단 툴바 */}
@@ -495,7 +496,6 @@ export default function Editor() {
               <button
                 onClick={() => {
                   if (!fabricCanvas.current) return;
-
                   const canvasWidth = fabricCanvas.current.getWidth();
                   const canvasHeight = fabricCanvas.current.getHeight();
                   const screenWidth = window.screen.width;
@@ -856,8 +856,7 @@ export default function Editor() {
                       </div>
                     </div>
                   </div>
-                </div>       
-
+                </div>
               </div>
             ) : (
               <div className="text-center py-12 text-gray-500">
