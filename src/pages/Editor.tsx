@@ -315,16 +315,21 @@ export default function Editor() {
   };
 
   // 나중에 export 할때 계층 아닌것도 포함할거임 ㅇㅇ
-  const combinedTree = fabricCanvas.current
-    ? getCombinedTree(fabricCanvas.current, tree, "combined")
+  const treeNodes = fabricCanvas.current
+    ? getCombinedTree(fabricCanvas.current, tree, "tree")
     : [];
-
+  const unlinkedNodes = fabricCanvas.current
+    ? getCombinedTree(fabricCanvas.current, tree, "unlinked")
+    : [];
+  // const combinedNodes = fabricCanvas.current
+  // ? getCombinedTree(fabricCanvas.current, tree, "tree")
+  // : [];
   
   // 파일 다운로드 로직
   const [exportFile, setExportFile] = useState('')
   useEffect(() => {
     if (exportFile === "") return;
-
+    console.log(exportFile)
     const blob = new Blob([exportFile], { type: "text/html" });
 
     const url = URL.createObjectURL(blob);
@@ -337,6 +342,138 @@ export default function Editor() {
     URL.revokeObjectURL(url);
   }, [exportFile]);
 
+// 정렬
+  const handleSelfAlign = (pos: any, fabricCanvas: any, tree: TreeNode[]) => {
+    if (!fabricCanvas.current) return;
+
+    const canvas = fabricCanvas.current;
+    const activeObject = canvas.getActiveObject();
+
+    if (!activeObject) {
+      alert("도형을 선택하세요.");
+      return;
+    }
+
+    const findParentNode = (
+      nodes: TreeNode[],
+      childId: string,
+      parent: TreeNode | null = null
+    ): TreeNode | null => {
+      for (const node of nodes) {
+        if (node.id === childId) return parent;
+        const found = findParentNode(node.children, childId, node);
+        if (found) return found;
+      }
+      return null;
+    };
+
+    const activeId =
+      (activeObject as any).customId ?? activeObject?.toObject()?.id;
+
+    const parentNode = findParentNode(tree, activeId);
+
+    // 1) 위치 계산 (새로운 left 값)
+    const calculateNewLeft = (
+      pos: "left" | "center" | "right",
+      containerLeft: number,
+      containerWidth: number,
+      objectWidth: number
+    ): number => {
+      switch (pos) {
+        case "left":
+          return containerLeft;
+        case "center":
+          return containerLeft + (containerWidth - objectWidth) / 2;
+        case "right":
+          return containerLeft + containerWidth - objectWidth;
+        default:
+          return containerLeft;
+      }
+    };
+
+    // 2) 선택 도형이 레이아웃인지 확인
+    const shapeType = activeObject.get?.("shapeType") || activeObject.type;
+    const isLayout = shapeType === "layout";
+
+    if (!parentNode) {
+      // 부모 없으면 캔버스 기준 정렬
+      const canvasWidth = canvas.getWidth();
+      const objectWidth = activeObject.getScaledWidth();
+      const newLeft = calculateNewLeft(pos, 0, canvasWidth, objectWidth);
+
+      // 만약 선택 도형이 layout이면 자식도 이동
+      if (isLayout) {
+        moveChildren(tree, activeObject, newLeft - (activeObject.left ?? 0));
+      }
+
+      activeObject.set({ left: newLeft });
+    } else {
+      // 부모 기준 정렬
+      const parentObject = parentNode.object;
+      const parentLeft = parentObject.left ?? 0;
+      const parentWidth = parentObject.getScaledWidth();
+
+      const objectWidth = activeObject.getScaledWidth();
+      const newLeft = calculateNewLeft(
+        pos,
+        parentLeft,
+        parentWidth,
+        objectWidth
+      );
+
+      if (isLayout) {
+        moveChildren(tree, activeObject, newLeft - (activeObject.left ?? 0));
+      }
+
+      activeObject.set({ left: newLeft });
+    }
+
+    activeObject.setCoords();
+    canvas.requestRenderAll();
+  };
+
+  // 자식 도형들 위치 이동 함수 (x축 이동량 만큼 좌표 이동)
+  const moveChildren = (
+    tree: TreeNode[],
+    parentObject: fabric.Object,
+    deltaX: number
+  ) => {
+    // 부모 노드 id
+    const parentId =
+      (parentObject as any).customId ?? parentObject?.toObject()?.id;
+    if (!parentId) return;
+
+    // 재귀로 자식 노드 찾고 이동
+    const findAndMove = (nodes: TreeNode[]) => {
+      for (const node of nodes) {
+        if (node.id === parentId) {
+          // 이 노드의 자식들을 이동시킨다.
+          moveNodeChildren(node.children, deltaX);
+          break;
+        } else {
+          findAndMove(node.children);
+        }
+      }
+    };
+
+    const moveNodeChildren = (children: TreeNode[], deltaX: number) => {
+      children.forEach((child) => {
+        const obj = child.object;
+        if (!obj) return;
+        const oldLeft = obj.left ?? 0;
+        obj.set({ left: oldLeft + deltaX });
+        obj.setCoords();
+
+        // 자식이 더 있으면 재귀 이동
+        if (child.children.length > 0) {
+          moveNodeChildren(child.children, deltaX);
+        }
+      });
+    };
+
+    findAndMove(tree);
+  };
+  
   return (
     <div className="h-screen bg-gray-900 flex flex-col">
       {/* 상단 툴바 */}
@@ -358,10 +495,19 @@ export default function Editor() {
               <button
                 onClick={() => {
                   if (!fabricCanvas.current) return;
-                  const code = treeToCode(combinedTree);
 
-                  setExportFile(
-                    `
+                  const canvasWidth = fabricCanvas.current.getWidth();
+                  const canvasHeight = fabricCanvas.current.getHeight();
+                  const screenWidth = window.screen.width;
+                  const screenHeight = window.screen.height;
+                  console.log(screenWidth,screenHeight)
+                  const scaleX = screenWidth / canvasWidth;
+                  const scaleY = screenHeight / canvasHeight;
+
+                  
+                  const code = treeToCode(treeNodes, unlinkedNodes, 0, 0, 0, scaleX, scaleY);
+
+                  setExportFile(`
                     <!DOCTYPE html>
                     <html lang="en">
                     <head>
@@ -372,7 +518,6 @@ export default function Editor() {
                         body {
                           position: relative;
                           width: 100%;
-                          height: 100vh;
                           margin: 0;
                         }
                       </style>
@@ -381,9 +526,9 @@ export default function Editor() {
                     ${code}
                     </body>
                     </html>
-                    `
-                  );
+                  `);
                 }}
+
                 className="px-3 py-1.5 bg-gray-700 text-gray-200 rounded-md hover:bg-gray-600 transition-colors text-sm flex items-center space-x-1"
               >
                 <Download size={14} />
@@ -686,6 +831,33 @@ export default function Editor() {
                     />
                   </div>
                 </div>
+
+                {/* Array */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-gray-300">Array</h3>
+                  <div className="space-y-3">
+                    {/* Self Array */}
+                    <div>
+                      <span className="text-sm text-gray-400 block mb-2">
+                        Self Align
+                      </span>
+                      <div className="flex gap-2">
+                        {["left", "center", "right"].map((pos) => (
+                          <button
+                            key={pos}
+                            onClick={() =>
+                              handleSelfAlign(pos, fabricCanvas, tree)
+                            }
+                            className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded-md text-sm text-gray-200 transition-all"
+                          >
+                            {pos}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>       
+
               </div>
             ) : (
               <div className="text-center py-12 text-gray-500">
