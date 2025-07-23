@@ -35,34 +35,84 @@ const generateUnlinkedNodeCode = (
   const indentSpace = " ".repeat(indent * 2);
   const id = node.id;
 
-      const width = (node.object as any).width || 0;
-      const height = (node.object as any).height || 0;
-      const fill = (node.object as any).fill || "transparent";
-      const stroke = (node.object as any).stroke || "none";
+  const width = (object.width || 0) * scaleX;
+  const height = (object.height || 0) * scaleY;
+  const left = (object.left || 0) * scaleX;
+  const top = (object.top || 0) * scaleY;
+  const fill = object.fill || "transparent";
+  const stroke = object.stroke || "none";
 
-      const left = (node.object as any).left || 0;
-      const top = (node.object as any).top || 0;
-      // left, top은 지금 임시고, 
-      // 이거 나중에 mt, ml, mr,mb,
-      // flex, justify-center,justify-between, items-center 필요하고
-      // 위의 요소가 적용되면, 이후 세부 움직임은, margin으로 가져가야할듯 ㅇㅇ
+  const style = `
+    position: absolute;
+    width: ${width}px;
+    height: ${height}px;
+    background-color: ${fill};
+    border: 1px solid ${stroke};
+    left: ${left}px;
+    top: ${top}px;
+  `.trim().replace(/\s+/g, " ");
 
+  const divStart = `${indentSpace}<div id="${id}" style="${style}">`;
+  const divEnd = `${indentSpace}</div>`;
 
-      const style = `
-        position: absolute;
-        width: ${width}px;
-        height: ${height}px;
-        background-color: ${fill};
-        border: 1px solid ${stroke};
-        left: ${left}px;
-        top: ${top}px;
-      `
-        .trim()
-        .replace(/\s+/g, " ");
+  return [divStart, divEnd].join("\n");
+};
 
 
-      const divStart = `${indentSpace}<div id="${id}" style="${style}">`;
-      const divLabel = `${indentSpace}  ${label}`;
+
+// 계층 코드 관리
+const generateTreeNodeCode = (
+  node: TreeNode,
+  indent: number,
+  parentLeft: number,
+  parentTop: number,
+  scaleX: number,
+  scaleY: number
+): string => {
+  const indentSpace = " ".repeat(indent * 2);
+  const id = node.id;
+
+  // 원래 값을 any로 접근
+  const object = node.object as any;
+
+  // 스케일 적용 (width/left 는 scaleX, height/top 은 scaleY)
+  const width = (object.width ?? 0) * scaleX;
+  const height = (object.height ?? 0) * scaleY;
+  const fill = object.fill || "transparent";
+  const stroke = object.stroke || "none";
+  const left = (object.left ?? 0) * scaleX;
+  const top = (object.top ?? 0) * scaleY;
+
+  const isRoot = indent === 0;
+
+  let style = "";
+  if (isRoot) {
+    style = `
+      position: absolute;
+      width: ${width}px;
+      height: ${height}px;
+      background-color: ${fill};
+      border: 1px solid ${stroke};
+      left: ${left}px;
+      top: ${top}px;
+    `;
+  } else {
+    // 부모 위치 차이 계산 시에도 scaleX, scaleY 반영
+    const childrenLeft = left - parentLeft;
+    const childrenTop = top - parentTop;
+    style = `
+      position: absolute;
+      width: ${width}px;
+      height: ${height}px;
+      background-color: ${fill};
+      border: 1px solid ${stroke};
+      left: ${childrenLeft}px;
+      top: ${childrenTop}px;
+    `;
+  }
+
+  style = style.trim().replace(/\s+/g, " ");
+  const divStart = `${indentSpace}<div id="${id}" style="${style}">`;
 
   let childrenCode = "";
   if (node.children && node.children.length > 0) {
@@ -73,9 +123,6 @@ const generateUnlinkedNodeCode = (
       .join("\n");
   }
 
-      const divEnd = `${indentSpace}</div>`;
-      
-      return [divStart, divLabel, childrenCode, divEnd].join("\n");
-    })
-    .join("\n");
+  const divEnd = `${indentSpace}</div>`;
+  return [divStart, childrenCode, divEnd].join("\n");
 };
