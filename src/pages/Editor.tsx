@@ -261,12 +261,22 @@ export default function Editor() {
       scaleY: 1,
     });
 
-    obj.set({
-      width: actualWidth,
-      height: actualHeight,
-      scaleX: 1,
-      scaleY: 1,
-    });
+    if (!(obj instanceof fabric.Image)) {
+      obj.set({
+        width: actualWidth,
+        height: actualHeight,
+        scaleX: 1,
+        scaleY: 1,
+      });
+    }
+    if ((obj instanceof fabric.Image)) {
+      // obj.set({
+      //   width: actualWidth,
+      //   height: actualHeight,
+      //   scaleX: 1,
+      //   scaleY: 1,
+      // });
+    }
   };
 
   const layoutListRef = useRef<fabric.Rect[]>([]);

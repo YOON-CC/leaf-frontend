@@ -1,4 +1,5 @@
 import * as fabric from "fabric";
+import { v4 as uuidv4 } from "uuid";
 
 export const createImage = (canvas: fabric.Canvas | null): void => {
   const input = document.createElement("input");
@@ -36,6 +37,10 @@ export const createImage = (canvas: fabric.Canvas | null): void => {
             scaleX: scale,
             scaleY: scale,
           });
+
+          // 커스텀 속성 추가
+          fabricImg.set("customId", uuidv4());
+          fabricImg.set("shapeType", "image");
 
           if (canvas) {
             canvas.add(fabricImg);
