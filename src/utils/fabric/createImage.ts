@@ -29,6 +29,7 @@ export const createImage = (canvas: fabric.Canvas | null): void => {
           const scale = Math.min(maxSize / origWidth, maxSize / origHeight);
 
           const fabricImg = new fabric.Image(imgElement, {
+            src: imageUrl,
             left: Math.random() * 200,
             top: Math.random() * 200,
             selectable: true,

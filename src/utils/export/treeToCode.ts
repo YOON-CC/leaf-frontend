@@ -4,6 +4,7 @@ import type { TreeNode } from "../../types/fabricTypes";
 export const treeToCode = (
   treeNodes: TreeNode[],
   unlinkedNodes?: TreeNode[],
+  imageData: any,
   indent = 0,
   parentLeft = 0,
   parentTop = 0,
@@ -17,7 +18,9 @@ export const treeToCode = (
     .join("\n");
 
   const unlinkedCode = (unlinkedNodes ?? [])
-    .map((node) => generateUnlinkedNodeCode(node, indent, scaleX, scaleY))
+    .map((node) =>
+      generateUnlinkedNodeCode(node, indent, scaleX, scaleY, imageData)
+    )
     .join("\n");
 
   return [linkedCode, unlinkedCode].filter(Boolean).join("\n");
@@ -28,9 +31,36 @@ const generateUnlinkedNodeCode = (
   node: TreeNode,
   indent: number,
   scaleX: number,
-  scaleY: number
+  scaleY: number,
+  imageData: any
 ): string => {
   const object = node.object as any;
+  console.log(object.shapeType, object, imageData[node.id]);
+
+  // 이미지의 경우
+  if (object.shapeType === "image") {
+    const indentSpace = " ".repeat(indent * 2);
+    const id = node.id;
+    const width = (imageData[node.id][0] || 0) * scaleX;
+    const height = (imageData[node.id][1] || 0) * scaleY;
+    const left = (object.left || 0) * scaleX;
+    const top = (object.top || 0) * scaleY;
+
+    const style = `
+    position: absolute;
+    width: ${width}px;
+    height: ${height}px;
+    margin-left: ${left}px;
+    margin-top: ${top}px;
+  `
+      .trim()
+      .replace(/\s+/g, " ");
+
+    const divStart = `${indentSpace}<img id="${id}" src="${object.src}" style="${style}"/>`;
+
+    return [divStart].join("\n");
+  }
+  // 이미지가 아닌경우
 
   const indentSpace = " ".repeat(indent * 2);
   const id = node.id;
@@ -50,15 +80,15 @@ const generateUnlinkedNodeCode = (
     border: 1px solid ${stroke};
     margin-left: ${left}px;
     margin-top: ${top}px;
-  `.trim().replace(/\s+/g, " ");
+  `
+    .trim()
+    .replace(/\s+/g, " ");
 
   const divStart = `${indentSpace}<div id="${id}" style="${style}">`;
   const divEnd = `${indentSpace}</div>`;
 
   return [divStart, divEnd].join("\n");
 };
-
-
 
 // 계층 코드 관리
 const generateTreeNodeCode = (

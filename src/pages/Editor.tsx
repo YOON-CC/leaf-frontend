@@ -67,7 +67,7 @@ export default function Editor() {
   const menuTimeoutRef = useRef<any>(null);
 
   // 🍎
-  const scalingTargetValueRef = useRef<Record<string, [number, number]>>({});
+  const scalingTargetValueRef = useRef<Record<string, [number, number]>>({}); // 실제 img selector 크기 저장
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -533,13 +533,14 @@ export default function Editor() {
                   const code = treeToCode(
                     treeNodes,
                     unlinkedNodes,
+                    scalingTargetValueRef.current,
                     0,
                     0,
                     0,
                     scaleX,
                     scaleY
                   );
-                  console.log("최종출력코드", code);
+                  // console.log("최종출력코드", code);
                   setExportFile(`
                     <!DOCTYPE html>
                     <html lang="en">
