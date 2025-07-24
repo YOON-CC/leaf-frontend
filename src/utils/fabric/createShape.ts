@@ -70,7 +70,9 @@ export function createShape(type: string): fabric.Object | null {
       return text;
     }
 
+
     default:
       return null;
   }
 }
+

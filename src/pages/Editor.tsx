@@ -28,6 +28,7 @@ import {
 import RenderTree from "../components/treeVisual/TreeRenderer";
 import { treeToCode } from "../utils/export/treeToCode";
 import { getCombinedTree } from "../utils/export/getCombinedTree";
+import { createImage } from '../utils/fabric/createImage';
 interface TreeNode {
   id: string; // customId
   object: fabric.Object;
@@ -325,8 +326,9 @@ export default function Editor() {
   // ? getCombinedTree(fabricCanvas.current, tree, "tree")
   // : [];
   
+
   // 파일 다운로드 로직
-  const [exportFile, setExportFile] = useState('')
+  const [exportFile, setExportFile] = useState("");
   useEffect(() => {
     if (exportFile === "") return;
     console.log(exportFile)
@@ -335,14 +337,14 @@ export default function Editor() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "test.html"; 
+    a.download = "test.html";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, [exportFile]);
 
-// 정렬
+  // 정렬
   const handleSelfAlign = (pos: any, fabricCanvas: any, tree: TreeNode[]) => {
     if (!fabricCanvas.current) return;
 
@@ -473,7 +475,7 @@ export default function Editor() {
 
     findAndMove(tree);
   };
-  
+
   return (
     <div className="h-screen bg-gray-900 flex flex-col">
       {/* 상단 툴바 */}
@@ -495,7 +497,6 @@ export default function Editor() {
               <button
                 onClick={() => {
                   if (!fabricCanvas.current) return;
-
                   const canvasWidth = fabricCanvas.current.getWidth();
                   const canvasHeight = fabricCanvas.current.getHeight();
                   const screenWidth = window.screen.width;
@@ -506,7 +507,7 @@ export default function Editor() {
 
                   
                   const code = treeToCode(treeNodes, unlinkedNodes, 0, 0, 0, scaleX, scaleY);
-
+                  console.log("최종출력코드", code)
                   setExportFile(`
                     <!DOCTYPE html>
                     <html lang="en">
@@ -518,12 +519,24 @@ export default function Editor() {
                         body {
                           position: relative;
                           width: 100%;
+                          height: 100vh;
                           margin: 0;
+                          background-color: gray;
                         }
                       </style>
                     </head>
                     <body>
-                    ${code}
+                      <div style="
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background-color: white;
+                        height: 100vh;
+                        width: ${screenWidth}px;
+                      ">
+                        ${code}
+                      </div>
                     </body>
                     </html>
                   `);
@@ -651,6 +664,17 @@ export default function Editor() {
                     />
                     <span className="text-xs text-gray-300">Text</span>
                   </button>
+                  <button
+                    onClick={() => createImage("image")} // `canvas`는 useRef 등으로 가져온 fabric.Canvas 객체
+                    className="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors flex flex-col items-center space-y-1 group"
+                  >
+                    <Square
+                      size={20}
+                      className="text-red-400 group-hover:text-red-300"
+                    />
+                    <span className="text-xs text-gray-300">Image</span>
+                  </button>
+
                 </div>
               </div>
             ) : (
@@ -856,8 +880,7 @@ export default function Editor() {
                       </div>
                     </div>
                   </div>
-                </div>       
-
+                </div>
               </div>
             ) : (
               <div className="text-center py-12 text-gray-500">

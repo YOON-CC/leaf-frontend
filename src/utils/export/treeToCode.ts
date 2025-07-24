@@ -48,8 +48,8 @@ const generateUnlinkedNodeCode = (
     height: ${height}px;
     background-color: ${fill};
     border: 1px solid ${stroke};
-    left: ${left}px;
-    top: ${top}px;
+    margin-left: ${left}px;
+    margin-top: ${top}px;
   `.trim().replace(/\s+/g, " ");
 
   const divStart = `${indentSpace}<div id="${id}" style="${style}">`;
@@ -93,8 +93,8 @@ const generateTreeNodeCode = (
       height: ${height}px;
       background-color: ${fill};
       border: 1px solid ${stroke};
-      left: ${left}px;
-      top: ${top}px;
+      margin-left: ${left}px;
+      margin-top: ${top}px;
     `;
   } else {
     // 부모 위치 차이 계산 시에도 scaleX, scaleY 반영
@@ -106,8 +106,8 @@ const generateTreeNodeCode = (
       height: ${height}px;
       background-color: ${fill};
       border: 1px solid ${stroke};
-      left: ${childrenLeft}px;
-      top: ${childrenTop}px;
+      margin-left: ${childrenLeft}px;
+      margin-top: ${childrenTop}px;
     `;
   }
 

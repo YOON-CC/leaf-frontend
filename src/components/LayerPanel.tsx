@@ -1,4 +1,4 @@
-import { Layers, Square, Circle, Triangle } from "lucide-react";
+import { Layers } from "lucide-react";
 import * as fabric from "fabric";
 
 interface TreeNode {
