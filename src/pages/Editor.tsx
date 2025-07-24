@@ -278,19 +278,6 @@ export default function Editor() {
       if (objectId) {
         scalingTargetValueRef.current[objectId] = [actualWidth, actualHeight];
       }
-      console.log(scalingTargetValueRef);
-      // if (widthValue?.current === null || widthValue?.current) {
-      //   widthValue.current = actualWidth;
-      // }
-      // if (heightValue?.current === null || heightValue?.current) {
-      //   heightValue.current = actualHeight;
-      // }
-      // obj.set({
-      //   // width: actualWidth,
-      //   // height: actualHeight,
-      //   scaleX: obj.scaleX,
-      //   scaleY: obj.scaleY,
-      // });
     }
   };
 
