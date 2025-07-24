@@ -4,7 +4,7 @@ import type { TreeNode } from "../../types/fabricTypes";
 export const treeToCode = (
   treeNodes: TreeNode[],
   unlinkedNodes?: TreeNode[],
-  imageData: any,
+  imageData?: any,
   indent = 0,
   parentLeft = 0,
   parentTop = 0,
@@ -13,7 +13,15 @@ export const treeToCode = (
 ): string => {
   const linkedCode = treeNodes
     .map((node) =>
-      generateTreeNodeCode(node, indent, parentLeft, parentTop, scaleX, scaleY)
+      generateTreeNodeCode(
+        node,
+        indent,
+        parentLeft,
+        parentTop,
+        scaleX,
+        scaleY,
+        imageData
+      )
     )
     .join("\n");
 
@@ -97,7 +105,8 @@ const generateTreeNodeCode = (
   parentLeft: number,
   parentTop: number,
   scaleX: number,
-  scaleY: number
+  scaleY: number,
+  imageData?: any
 ): string => {
   const indentSpace = " ".repeat(indent * 2);
   const id = node.id;
@@ -106,6 +115,7 @@ const generateTreeNodeCode = (
   const object = node.object as any;
 
   // 스케일 적용 (width/left 는 scaleX, height/top 은 scaleY)
+
   const width = (object.width ?? 0) * scaleX;
   const height = (object.height ?? 0) * scaleY;
   const fill = object.fill || "transparent";
@@ -130,7 +140,19 @@ const generateTreeNodeCode = (
     // 부모 위치 차이 계산 시에도 scaleX, scaleY 반영
     const childrenLeft = left - parentLeft;
     const childrenTop = top - parentTop;
-    style = `
+
+    if (object.shapeType === "image") {
+      const imageWidth = (imageData[node.id][0] || 0) * scaleX;
+      const imageHeight = (imageData[node.id][1] || 0) * scaleY;
+      style = `
+      position: absolute;
+      width: ${imageWidth}px;
+      height: ${imageHeight}px;
+      margin-left: ${childrenLeft}px;
+      margin-top: ${childrenTop}px;
+    `;
+    } else {
+      style = `
       position: absolute;
       width: ${width}px;
       height: ${height}px;
@@ -139,8 +161,35 @@ const generateTreeNodeCode = (
       margin-left: ${childrenLeft}px;
       margin-top: ${childrenTop}px;
     `;
+    }
   }
 
+  // 이미지의 경우
+  if (object.shapeType === "image") {
+    style = style.trim().replace(/\s+/g, " ");
+    const divStart = `${indentSpace}<img id="${id}" src="${object.src}" style="${style}"/>`;
+
+    let childrenCode = "";
+    if (node.children && node.children.length > 0) {
+      childrenCode = node.children
+        .map((child) =>
+          generateTreeNodeCode(
+            child,
+            indent + 1,
+            left,
+            top,
+            scaleX,
+            scaleY,
+            imageData
+          )
+        )
+        .join("\n");
+    }
+
+    return [divStart, childrenCode].join("\n");
+  }
+
+  //이미지가 아닐때
   style = style.trim().replace(/\s+/g, " ");
   const divStart = `${indentSpace}<div id="${id}" style="${style}">`;
 
@@ -148,7 +197,15 @@ const generateTreeNodeCode = (
   if (node.children && node.children.length > 0) {
     childrenCode = node.children
       .map((child) =>
-        generateTreeNodeCode(child, indent + 1, left, top, scaleX, scaleY)
+        generateTreeNodeCode(
+          child,
+          indent + 1,
+          left,
+          top,
+          scaleX,
+          scaleY,
+          imageData
+        )
       )
       .join("\n");
   }
