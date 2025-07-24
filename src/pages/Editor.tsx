@@ -29,7 +29,7 @@ import {
 import RenderTree from "../components/treeVisual/TreeRenderer";
 import { treeToCode } from "../utils/export/treeToCode";
 import { getCombinedTree } from "../utils/export/getCombinedTree";
-import { createImage } from '../utils/fabric/createImage';
+import { createImage } from "../utils/fabric/createImage";
 interface TreeNode {
   id: string; // customId
   object: fabric.Object;
@@ -67,6 +67,8 @@ export default function Editor() {
   const menuTimeoutRef = useRef<any>(null);
 
   // 🍎
+  const scalingTargetValueRef = useRef<Record<string, [number, number]>>({});
+
   useEffect(() => {
     if (!canvasRef.current) return;
 
@@ -269,12 +271,25 @@ export default function Editor() {
         scaleY: 1,
       });
     }
-    if ((obj instanceof fabric.Image)) {
+    if (obj instanceof fabric.Image) {
+      const objectId =
+        (obj as any)?.id || (obj as any)?.name || (obj as any)?.customId || "";
+
+      if (objectId) {
+        scalingTargetValueRef.current[objectId] = [actualWidth, actualHeight];
+      }
+      console.log(scalingTargetValueRef);
+      // if (widthValue?.current === null || widthValue?.current) {
+      //   widthValue.current = actualWidth;
+      // }
+      // if (heightValue?.current === null || heightValue?.current) {
+      //   heightValue.current = actualHeight;
+      // }
       // obj.set({
-      //   width: actualWidth,
-      //   height: actualHeight,
-      //   scaleX: 1,
-      //   scaleY: 1,
+      //   // width: actualWidth,
+      //   // height: actualHeight,
+      //   scaleX: obj.scaleX,
+      //   scaleY: obj.scaleY,
       // });
     }
   };
@@ -336,13 +351,12 @@ export default function Editor() {
   // const combinedNodes = fabricCanvas.current
   // ? getCombinedTree(fabricCanvas.current, tree, "tree")
   // : [];
-  
 
   // 파일 다운로드 로직
   const [exportFile, setExportFile] = useState("");
   useEffect(() => {
     if (exportFile === "") return;
-    console.log(exportFile)
+    console.log(exportFile);
     const blob = new Blob([exportFile], { type: "text/html" });
 
     const url = URL.createObjectURL(blob);
@@ -512,13 +526,20 @@ export default function Editor() {
                   const canvasHeight = fabricCanvas.current.getHeight();
                   const screenWidth = window.screen.width;
                   const screenHeight = window.screen.height;
-                  console.log(screenWidth,screenHeight)
+                  console.log(screenWidth, screenHeight);
                   const scaleX = screenWidth / canvasWidth;
                   const scaleY = screenHeight / canvasHeight;
 
-                  
-                  const code = treeToCode(treeNodes, unlinkedNodes, 0, 0, 0, scaleX, scaleY);
-                  console.log("최종출력코드", code)
+                  const code = treeToCode(
+                    treeNodes,
+                    unlinkedNodes,
+                    0,
+                    0,
+                    0,
+                    scaleX,
+                    scaleY
+                  );
+                  console.log("최종출력코드", code);
                   setExportFile(`
                     <!DOCTYPE html>
                     <html lang="en">
@@ -552,7 +573,6 @@ export default function Editor() {
                     </html>
                   `);
                 }}
-
                 className="px-3 py-1.5 bg-gray-700 text-gray-200 rounded-md hover:bg-gray-600 transition-colors text-sm flex items-center space-x-1"
               >
                 <Download size={14} />
@@ -685,7 +705,6 @@ export default function Editor() {
                     />
                     <span className="text-xs text-gray-300">Image</span>
                   </button>
-
                 </div>
               </div>
             ) : (
