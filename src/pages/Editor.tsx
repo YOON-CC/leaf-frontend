@@ -16,6 +16,7 @@ import {
   Grid,
   ZoomIn,
   ZoomOut,
+  Image,
 } from "lucide-react";
 import { createShape } from "../utils/fabric/createShape";
 import {
@@ -665,12 +666,12 @@ export default function Editor() {
                     <span className="text-xs text-gray-300">Text</span>
                   </button>
                   <button
-                    onClick={() => createImage("image")} // `canvas`는 useRef 등으로 가져온 fabric.Canvas 객체
+                    onClick={() => createImage(fabricCanvas.current)}
                     className="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors flex flex-col items-center space-y-1 group"
                   >
-                    <Square
+                    <Image
                       size={20}
-                      className="text-red-400 group-hover:text-red-300"
+                      className="text-yellow-400 group-hover:text-red-300"
                     />
                     <span className="text-xs text-gray-300">Image</span>
                   </button>
