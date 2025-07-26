@@ -317,7 +317,79 @@ export default function Editor() {
     if (!selectedObject || !fabricCanvas.current) return;
 
     fabricCanvas.current.remove(selectedObject);
+
+    setTree((prevTree) =>
+      prevTree.filter((node) => node.object !== selectedObject)
+    );
+
     setSelectedObject(null);
+  };
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Delete") {
+        deleteSelected();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [deleteSelected]);
+
+  // 🍎 순서 변경
+  const [objectOrder, setObjectOrder] = useState<fabric.Object[]>([]);
+
+  const showZIndexOrder = () => {
+    if (!fabricCanvas.current) return;
+    const objects = fabricCanvas.current.getObjects();
+    setObjectOrder([...objects]);
+  };
+
+  useEffect(() => {
+    showZIndexOrder();
+  }, [selectedObject]);
+
+  const moveUp = (index: number) => {
+    if (index === 0) return; // 맨 위면 이동 불가
+    const newOrder = [...objectOrder];
+    [newOrder[index - 1], newOrder[index]] = [
+      newOrder[index],
+      newOrder[index - 1],
+    ];
+    setObjectOrder(newOrder);
+    updateCanvasOrder(newOrder);
+  };
+
+  const moveDown = (index: number) => {
+    if (index === objectOrder.length - 1) return; // 맨 아래면 이동 불가
+    const newOrder = [...objectOrder];
+    [newOrder[index + 1], newOrder[index]] = [
+      newOrder[index],
+      newOrder[index + 1],
+    ];
+    setObjectOrder(newOrder);
+    updateCanvasOrder(newOrder);
+  };
+
+  const updateCanvasOrder = (newOrder: fabric.Object[]) => {
+    if (!fabricCanvas.current) return;
+
+    const canvas = fabricCanvas.current;
+
+    // 현재 선택 객체 저장
+    const selected = canvas.getActiveObject();
+
+    canvas.clear();
+
+    newOrder.forEach((obj) => {
+      canvas.add(obj);
+    });
+
+    canvas.renderAll();
+
+    // 선택 객체가 있으면 다시 선택 상태로 설정
+    if (selected) {
+      canvas.setActiveObject(selected);
+    }
   };
 
   // 🍎
@@ -898,6 +970,51 @@ export default function Editor() {
                       </div>
                     </div>
                   </div>
+                </div>
+
+                {/* Zindex */}
+                <div className="space-y-4 text-white">
+                  <h3 className="text-sm font-medium text-gray-300">z-index</h3>
+                  <ul className="space-y-1 mt-2">
+                    {objectOrder.map((obj, index) => {
+                      const isSelected = selectedObject === obj;
+
+                      return (
+                        <li
+                          key={obj.id || obj.name || index}
+                          className={`flex items-center justify-between bg-gray-700 px-3 py-2 rounded
+                            ${
+                              isSelected
+                                ? "ring-2 ring-offset-2 ring-purple-400"
+                                : ""
+                            }
+                          `}
+                          tabIndex={isSelected ? 0 : -1} // 선택된 아이템에만 tab 포커스 가능
+                        >
+                          <div>
+                            {index}: {obj.type} (
+                            {obj.name || obj.id || "unnamed"})
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              disabled={index === 0}
+                              onClick={() => moveUp(index)}
+                              className={`px-2 py-1 rounded bg-blue-600 hover:bg-blue-700 disabled:opacity-50`}
+                            >
+                              ▲
+                            </button>
+                            <button
+                              disabled={index === objectOrder.length - 1}
+                              onClick={() => moveDown(index)}
+                              className={`px-2 py-1 rounded bg-blue-600 hover:bg-blue-700 disabled:opacity-50`}
+                            >
+                              ▼
+                            </button>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
               </div>
             ) : (
