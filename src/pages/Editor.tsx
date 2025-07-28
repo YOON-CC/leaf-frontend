@@ -19,12 +19,7 @@ import {
   Image,
 } from "lucide-react";
 import { createShape } from "../utils/fabric/createShape";
-import {
-  addChildToTree,
-  findNodeByIdInTree,
-  isDescendant,
-  moveSubtreeInTree,
-} from "../utils/tree/treeUtils";
+import { addChildToTree } from "../utils/tree/treeUtils";
 
 import RenderTree from "../components/treeVisual/TreeRenderer";
 import { treeToCode } from "../utils/export/treeToCode";
@@ -32,6 +27,14 @@ import { getCombinedTree } from "../utils/export/getCombinedTree";
 import { createImage } from "../utils/fabric/createImage";
 import { handleSelfAlign } from "../utils/array/objectAlign";
 import { moveDown, moveUp, showZIndexOrder } from "../utils/array/objectOrder";
+import { downloadHtmlFile } from "../utils/export/downloadHtmlFile";
+import { clearCanvas } from "../utils/fabric/clearCanvas";
+import {
+  deleteSelected,
+  registerDeleteKey,
+} from "../utils/handlers/deleteSelectedObject";
+import { updateProperty } from "../utils/fabric/changeObjectProperty";
+import { useInitCanvas } from "../hooks/fabricEventHooks";
 interface TreeNode {
   id: string; // customId
   object: fabric.Object;
@@ -68,223 +71,38 @@ export default function Editor() {
   } | null>(null);
   const menuTimeoutRef = useRef<any>(null);
 
-  // 🍎
-  const scalingTargetValueRef = useRef<Record<string, [number, number]>>({}); // 실제 img selector 크기 저장
-
-  useEffect(() => {
-    if (!canvasRef.current) return;
-
-    fabricCanvas.current = new fabric.Canvas(canvasRef.current, {
-      backgroundColor: "#ffffff",
-      width: 1200,
-      height: 800,
-    });
-
-    fabricCanvas.current.on("selection:created", (e) => {
-      const selected = e.selected[0];
-      setSelectedObject(selected);
-      syncObjectToState(selected, setObjectProperties);
-    });
-
-    fabricCanvas.current.on("selection:updated", (e) => {
-      const selected = e.selected[0];
-      setSelectedObject(selected);
-      syncObjectToState(selected, setObjectProperties);
-    });
-
-    // 도형 스케일 적용
-    fabricCanvas.current.on("object:scaling", (e) => {
-      const obj = e.target;
-      if (!obj) return;
-
-      syncObjectToState(obj, setObjectProperties);
-    });
-
-    fabricCanvas.current.on("selection:cleared", () => {
-      setSelectedObject(null);
-    });
-
-    fabricCanvas.current.on("object:moving", (e) => {
-      const movingObj = e.target;
-      if (!movingObj) return;
-
-      const shapeType = movingObj.get?.("shapeType");
-      if (shapeType === "layout") {
-        const layoutId = movingObj.get("customId");
-        if (!layoutId) return;
-
-        const prevLeft = movingObj.get("prevLeft") ?? movingObj.left!;
-        const prevTop = movingObj.get("prevTop") ?? movingObj.top!;
-
-        const dx = movingObj.left! - prevLeft;
-        const dy = movingObj.top! - prevTop;
-
-        const node = findNodeByIdInTree(treeRef.current, layoutId);
-
-        if (node && fabricCanvas.current) {
-          moveSubtreeInTree(node, dx, dy);
-          fabricCanvas.current.requestRenderAll();
-        }
-
-        movingObj.set("prevLeft", movingObj.left);
-        movingObj.set("prevTop", movingObj.top);
-      }
-
-      let intersecting = false;
-      let collidedLayout: fabric.Rect | null = null;
-
-      layoutListRef.current.forEach((layout) => {
-        // 자신 제외
-        if (movingObj === layout) return;
-
-        // 이쪽에서, 부모의 노드가, 자식의 노드로 들어가는 상황을 방지
-        const movingId = movingObj.get("customId");
-        const movingNode = findNodeByIdInTree(treeRef.current, movingId);
-        const layoutId = layout.get("customId");
-        if (movingNode && isDescendant(movingNode, layoutId)) {
-          return;
-        }
-
-        if (movingObj.intersectsWithObject(layout)) {
-          layout.set("fill", "rgba(0, 145, 255, 0.1)");
-          intersecting = true;
-          collidedLayout = layout;
-        } else {
-          layout.set("fill", "rgba(255, 255, 255, 0.1)");
-        }
-      });
-
-      isIntersectingRef.current = intersecting;
-      layoutObjectRef.current = collidedLayout;
-      movingObjectRef.current = movingObj;
-
-      fabricCanvas.current?.renderAll();
-
-      // 이미 계층인거는, layout 이동은 layers에서만 할수있도록
-      const childId = movingObj.get("customId");
-
-      const hasParent = (nodes: TreeNode[], childId: string): boolean => {
-        for (const node of nodes) {
-          const childExists = node.children.some(
-            (child) => child.id === childId
-          );
-          if (childExists) return true;
-
-          if (hasParent(node.children, childId)) return true;
-        }
-        return false;
-      };
-
-      if (
-        intersecting &&
-        collidedLayout &&
-        fabricCanvas.current &&
-        !hasParent(treeRef.current, childId)
-      ) {
-        const canvasRect = fabricCanvas.current
-          .getElement()
-          .getBoundingClientRect();
-        const layoutMenu = collidedLayout as fabric.Rect;
-        const center = {
-          x: (layoutMenu.left ?? 0) + (layoutMenu.width ?? 0) / 2,
-          y: (layoutMenu.top ?? 0) + (layoutMenu.height ?? 0) / 2,
-        };
-
-        setMenuPosition({
-          x: canvasRect.left + center.x,
-          y: canvasRect.top + center.y,
-        });
-
-        setHoveredLayout(collidedLayout);
-
-        if (menuTimeoutRef.current) clearTimeout(menuTimeoutRef.current);
-
-        menuTimeoutRef.current = setTimeout(() => {
-          setHoveredLayout(null);
-          setMenuPosition(null);
-        }, 2000);
-      } else {
-        setHoveredLayout(null);
-        setMenuPosition(null);
-
-        if (menuTimeoutRef.current) {
-          clearTimeout(menuTimeoutRef.current);
-          menuTimeoutRef.current = null;
-        }
-      }
-    });
-
-    fabricCanvas.current.on("object:modified", () => {
-      if (isIntersectingRef.current) {
-        // creatingRelationShip(layoutObjectRef.current, movingObjectRef.current);
-
-        // layout 색상 원래대로 복구
-        layoutListRef.current.forEach((layout) => {
-          layout.set("fill", "rgba(255, 255, 255, 0.1)");
-        });
-
-        fabricCanvas.current?.renderAll();
-      }
-      isIntersectingRef.current = false;
-    });
-
-    return () => {
-      fabricCanvas.current?.dispose();
-      fabricCanvas.current = null;
-    };
-  }, []);
-
-  // 계층관계 생성
+  // 계층관계 트리 로직생성
   const treeRef = useRef<TreeNode[]>([]);
   const [tree, setTree] = useState<TreeNode[]>([]);
 
-  // tree 상태 업데이트시 ref도 업데이트
   useEffect(() => {
     treeRef.current = tree;
   }, [tree]);
 
-  // console.log(tree);
-
-  // 🍎
-  const syncObjectToState = (
-    obj: fabric.Object,
-    setProps: React.Dispatch<React.SetStateAction<any>>
-  ) => {
-    const actualWidth = obj.width! * obj.scaleX!;
-    const actualHeight = obj.height! * obj.scaleY!;
-
-    setProps({
-      fill: (obj.fill as string) || "#ff0000",
-      strokeWidth: obj.strokeWidth || 0,
-      stroke: (obj.stroke as string) || "#000000",
-      opacity: obj.opacity || 1,
-      angle: obj.angle || 0,
-      width: actualWidth,
-      height: actualHeight,
-      scaleX: 1,
-      scaleY: 1,
-    });
-
-    if (!(obj instanceof fabric.Image)) {
-      obj.set({
-        width: actualWidth,
-        height: actualHeight,
-        scaleX: 1,
-        scaleY: 1,
-      });
-    }
-    if (obj instanceof fabric.Image) {
-      const objectId =
-        (obj as any)?.id || (obj as any)?.name || (obj as any)?.customId || "";
-
-      if (objectId) {
-        scalingTargetValueRef.current[objectId] = [actualWidth, actualHeight];
-      }
-    }
-  };
-
+  // 레이아웃 관리
   const layoutListRef = useRef<fabric.Rect[]>([]);
 
+  // 실제 img selector 크기 저장
+  const scalingTargetValueRef = useRef<Record<string, [number, number]>>({});
+
+  // fabric의 대부분의 이벤트 관리
+  useInitCanvas({
+    canvasRef,
+    fabricCanvas,
+    setSelectedObject,
+    setObjectProperties,
+    scalingTargetValueRef,
+    treeRef,
+    layoutListRef,
+    isIntersectingRef,
+    layoutObjectRef,
+    movingObjectRef,
+    setMenuPosition,
+    setHoveredLayout,
+    menuTimeoutRef,
+  });
+
+  // object 생성
   const addShape = (type: string) => {
     if (!fabricCanvas.current) return;
 
@@ -301,56 +119,39 @@ export default function Editor() {
     fabricCanvas.current.requestRenderAll();
   };
 
-  // 🍎
-  const updateProperty = (property: string, value: string | number) => {
-    if (!selectedObject || !fabricCanvas.current) return;
-
-    selectedObject.set(property, value);
-    fabricCanvas.current.renderAll();
-
-    setObjectProperties((prev) => ({
-      ...prev,
-      [property]: value,
-    }));
-  };
-
-  // 🍎
-  const deleteSelected = () => {
-    if (!selectedObject || !fabricCanvas.current) return;
-
-    fabricCanvas.current.remove(selectedObject);
-
-    setTree((prevTree) =>
-      prevTree.filter((node) => node.object !== selectedObject)
+  // object 속성 변경
+  const handlePropertyChange = (property: string, value: string | number) => {
+    updateProperty(
+      selectedObject,
+      fabricCanvas,
+      setObjectProperties,
+      property,
+      value
     );
-
-    setSelectedObject(null);
   };
+
+  // delete키 입력시 object 삭제
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Delete") {
-        deleteSelected();
-      }
-    };
+    const cleanup = registerDeleteKey(() => {
+      deleteSelected(selectedObject, fabricCanvas, setTree, setSelectedObject);
+    });
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [deleteSelected]);
+    return cleanup;
+  }, [selectedObject]);
 
-  // 🍎 순서 변경
+  // 순서 zindex 변경
   const [objectOrder, setObjectOrder] = useState<fabric.Object[]>([]);
 
   useEffect(() => {
     showZIndexOrder(fabricCanvas, setObjectOrder);
   }, [selectedObject]);
 
-  // 🍎
-  const clearCanvas = () => {
-    if (!fabricCanvas.current) return;
-    fabricCanvas.current.clear();
-    fabricCanvas.current.backgroundColor = "#ffffff";
-    fabricCanvas.current.renderAll();
-  };
+  // 파일 다운로드 로직
+  const [exportFile, setExportFile] = useState("");
+  useEffect(() => {
+    if (exportFile === "") return;
+    downloadHtmlFile(exportFile, "test.html");
+  }, [exportFile]);
 
   // 나중에 export 할때 계층 아닌것도 포함할거임 ㅇㅇ
   const treeNodes = fabricCanvas.current
@@ -359,26 +160,6 @@ export default function Editor() {
   const unlinkedNodes = fabricCanvas.current
     ? getCombinedTree(fabricCanvas.current, tree, "unlinked")
     : [];
-  // const combinedNodes = fabricCanvas.current
-  // ? getCombinedTree(fabricCanvas.current, tree, "tree")
-  // : [];
-
-  // 파일 다운로드 로직
-  const [exportFile, setExportFile] = useState("");
-  useEffect(() => {
-    if (exportFile === "") return;
-    console.log(exportFile);
-    const blob = new Blob([exportFile], { type: "text/html" });
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "test.html";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, [exportFile]);
 
   return (
     <div className="h-screen bg-gray-900 flex flex-col">
@@ -477,7 +258,7 @@ export default function Editor() {
             </button>
 
             <button
-              onClick={clearCanvas}
+              onClick={() => clearCanvas(fabricCanvas)}
               className="px-3 py-1.5 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-md transition-colors text-sm"
             >
               Clear All
@@ -648,7 +429,14 @@ export default function Editor() {
                       <Copy size={14} />
                     </button>
                     <button
-                      onClick={deleteSelected}
+                      onClick={() =>
+                        deleteSelected(
+                          selectedObject,
+                          fabricCanvas,
+                          setTree,
+                          setSelectedObject
+                        )
+                      }
                       className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors"
                     >
                       <Trash2 size={14} />
@@ -665,13 +453,17 @@ export default function Editor() {
                     <input
                       type="color"
                       value={objectProperties.fill}
-                      onChange={(e) => updateProperty("fill", e.target.value)}
+                      onChange={(e) =>
+                        handlePropertyChange("fill", e.target.value)
+                      }
                       className="w-10 h-10 rounded-lg border border-gray-600 bg-gray-700"
                     />
                     <input
                       type="text"
                       value={objectProperties.fill}
-                      onChange={(e) => updateProperty("fill", e.target.value)}
+                      onChange={(e) =>
+                        handlePropertyChange("fill", e.target.value)
+                      }
                       className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -686,13 +478,17 @@ export default function Editor() {
                     <input
                       type="color"
                       value={objectProperties.stroke}
-                      onChange={(e) => updateProperty("stroke", e.target.value)}
+                      onChange={(e) =>
+                        handlePropertyChange("stroke", e.target.value)
+                      }
                       className="w-10 h-10 rounded-lg border border-gray-600 bg-gray-700"
                     />
                     <input
                       type="text"
                       value={objectProperties.stroke}
-                      onChange={(e) => updateProperty("stroke", e.target.value)}
+                      onChange={(e) =>
+                        handlePropertyChange("stroke", e.target.value)
+                      }
                       className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -710,7 +506,10 @@ export default function Editor() {
                       max="10"
                       value={objectProperties.strokeWidth}
                       onChange={(e) =>
-                        updateProperty("strokeWidth", parseInt(e.target.value))
+                        handlePropertyChange(
+                          "strokeWidth",
+                          parseInt(e.target.value)
+                        )
                       }
                       className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
                     />
@@ -734,7 +533,10 @@ export default function Editor() {
                     step="0.1"
                     value={objectProperties.opacity}
                     onChange={(e) =>
-                      updateProperty("opacity", parseFloat(e.target.value))
+                      handlePropertyChange(
+                        "opacity",
+                        parseFloat(e.target.value)
+                      )
                     }
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
                   />
@@ -759,7 +561,7 @@ export default function Editor() {
                       max="360"
                       value={objectProperties.angle}
                       onChange={(e) =>
-                        updateProperty("angle", parseInt(e.target.value))
+                        handlePropertyChange("angle", parseInt(e.target.value))
                       }
                       className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
                     />
