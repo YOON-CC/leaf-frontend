@@ -13,9 +13,6 @@ import {
   Download,
   Layers,
   Copy,
-  Grid,
-  ZoomIn,
-  ZoomOut,
   Image,
 } from "lucide-react";
 import { createShape } from "../utils/fabric/createShape";
@@ -162,9 +159,9 @@ export default function Editor() {
     : [];
 
   return (
-    <div className="h-screen bg-gray-900 flex flex-col">
+    <div className="h-screen bg-[#1a1a1a] flex flex-col">
       {/* 상단 툴바 */}
-      <header className="bg-gray-800 border-b border-gray-700 px-4 py-2">
+      <header className="bg-[#1a1a1a] border-b border-gray-700 px-4 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-3">
@@ -234,7 +231,7 @@ export default function Editor() {
                     </html>
                   `);
                 }}
-                className="px-3 py-1.5 bg-gray-700 text-gray-200 rounded-md hover:bg-gray-600 transition-colors text-sm flex items-center space-x-1"
+                className="px-3 py-1.5 bg-[#1a1a1a] text-gray-200 rounded-md hover:bg-[#252525] transition-colors text-sm flex items-center space-x-1"
               >
                 <Download size={14} />
                 <span>Export</span>
@@ -243,20 +240,6 @@ export default function Editor() {
           </div>
 
           <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-1 bg-gray-700 rounded-lg p-1">
-              <button className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-colors">
-                <ZoomOut size={16} />
-              </button>
-              <span className="text-sm text-gray-300 px-2">100%</span>
-              <button className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-600 rounded transition-colors">
-                <ZoomIn size={16} />
-              </button>
-            </div>
-
-            <button className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors">
-              <Grid size={16} />
-            </button>
-
             <button
               onClick={() => clearCanvas(fabricCanvas)}
               className="px-3 py-1.5 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-md transition-colors text-sm"
@@ -269,15 +252,15 @@ export default function Editor() {
 
       <div className="flex-1 flex">
         {/* 왼쪽 사이드바 */}
-        <div className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col">
+        <div className="w-64 bg-[#1a1a1a] border-r border-gray-700 flex flex-col">
           {/* 탭 네비게이션 */}
           <div className="flex border-b border-gray-700">
             <button
               onClick={() => setActiveTab("shapes")}
               className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
                 activeTab === "shapes"
-                  ? "bg-gray-700 text-white border-b-2 border-blue-500"
-                  : "text-gray-400 hover:text-white hover:bg-gray-700"
+                  ? "bg-[#1a1a1a] text-white border-b-2 border-blue-500"
+                  : "text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
               }`}
             >
               Shapes
@@ -286,8 +269,8 @@ export default function Editor() {
               onClick={() => setActiveTab("layers")}
               className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
                 activeTab === "layers"
-                  ? "bg-gray-700 text-white border-b-2 border-blue-500"
-                  : "text-gray-400 hover:text-white hover:bg-gray-700"
+                  ? "bg-[#1a1a1a] text-white border-b-2 border-blue-500"
+                  : "text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
               }`}
             >
               Layers
@@ -305,7 +288,7 @@ export default function Editor() {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => addShape("layout")}
-                    className="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors flex flex-col items-center space-y-1 group"
+                    className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
                   >
                     <Layers
                       size={20}
@@ -315,7 +298,7 @@ export default function Editor() {
                   </button>
                   <button
                     onClick={() => addShape("circle")}
-                    className="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors flex flex-col items-center space-y-1 group"
+                    className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
                   >
                     <Circle
                       size={20}
@@ -326,7 +309,7 @@ export default function Editor() {
 
                   <button
                     onClick={() => addShape("rectangle")}
-                    className="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors flex flex-col items-center space-y-1 group"
+                    className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
                   >
                     <Square
                       size={20}
@@ -337,7 +320,7 @@ export default function Editor() {
 
                   <button
                     onClick={() => addShape("triangle")}
-                    className="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors flex flex-col items-center space-y-1 group"
+                    className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
                   >
                     <Triangle
                       size={20}
@@ -348,7 +331,7 @@ export default function Editor() {
 
                   <button
                     onClick={() => addShape("text")}
-                    className="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors flex flex-col items-center space-y-1 group"
+                    className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
                   >
                     <Type
                       size={20}
@@ -358,7 +341,7 @@ export default function Editor() {
                   </button>
                   <button
                     onClick={() => createImage(fabricCanvas.current)}
-                    className="p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors flex flex-col items-center space-y-1 group"
+                    className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
                   >
                     <Image
                       size={20}
@@ -399,7 +382,7 @@ export default function Editor() {
         </div>
 
         {/* 중앙 캔버스 영역 */}
-        <div className="flex-1 flex items-center justify-center bg-gray-900 p-8">
+        <div className="flex-1 flex items-center justify-center bg-[#1a1a1a] p-8">
           <div className="bg-white shadow-xl">
             <canvas
               ref={canvasRef}
@@ -409,7 +392,7 @@ export default function Editor() {
         </div>
 
         {/* 오른쪽 속성 패널 */}
-        <div className="w-80 bg-gray-800 border-l border-gray-700 flex flex-col">
+        <div className="w-80 bg-[#1a1a1a] border-l border-gray-700 flex flex-col">
           <div className="p-4 border-b border-gray-700">
             <h2 className="text-lg font-semibold text-white">Properties</h2>
           </div>
@@ -425,7 +408,7 @@ export default function Editor() {
                     </span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <button className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors">
+                    <button className="p-1.5 text-gray-400 hover:text-white hover:bg-[#252525] rounded transition-colors">
                       <Copy size={14} />
                     </button>
                     <button
@@ -456,7 +439,7 @@ export default function Editor() {
                       onChange={(e) =>
                         handlePropertyChange("fill", e.target.value)
                       }
-                      className="w-10 h-10 rounded-lg border border-gray-600 bg-gray-700"
+                      className="w-10 h-10 rounded-lg border border-gray-600 bg-[#303030]"
                     />
                     <input
                       type="text"
@@ -464,7 +447,7 @@ export default function Editor() {
                       onChange={(e) =>
                         handlePropertyChange("fill", e.target.value)
                       }
-                      className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-3 py-2 bg-[#303030] border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -481,7 +464,7 @@ export default function Editor() {
                       onChange={(e) =>
                         handlePropertyChange("stroke", e.target.value)
                       }
-                      className="w-10 h-10 rounded-lg border border-gray-600 bg-gray-700"
+                      className="w-10 h-10 rounded-lg border border-gray-600 bg-[#303030]"
                     />
                     <input
                       type="text"
@@ -489,7 +472,7 @@ export default function Editor() {
                       onChange={(e) =>
                         handlePropertyChange("stroke", e.target.value)
                       }
-                      className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-3 py-2 bg-[#303030] border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
@@ -511,7 +494,7 @@ export default function Editor() {
                           parseInt(e.target.value)
                         )
                       }
-                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                      className="w-full h-2 bg-[#303030] rounded-lg appearance-none cursor-pointer slider"
                     />
                   </div>
                 </div>
@@ -538,7 +521,7 @@ export default function Editor() {
                         parseFloat(e.target.value)
                       )
                     }
-                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                    className="w-full h-2 bg-[#303030] rounded-lg appearance-none cursor-pointer slider"
                   />
                 </div>
 
@@ -563,7 +546,7 @@ export default function Editor() {
                       onChange={(e) =>
                         handlePropertyChange("angle", parseInt(e.target.value))
                       }
-                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                      className="w-full h-2 bg-[#303030] rounded-lg appearance-none cursor-pointer slider"
                     />
                   </div>
                 </div>
@@ -584,7 +567,7 @@ export default function Editor() {
                             onClick={() =>
                               handleSelfAlign(pos, fabricCanvas, tree)
                             }
-                            className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded-md text-sm text-gray-200 transition-all"
+                            className="flex-1 py-2 bg-[#303030] hover:bg-[#252525] rounded-md text-sm text-gray-200 transition-all"
                           >
                             {pos}
                           </button>
@@ -604,7 +587,7 @@ export default function Editor() {
                       return (
                         <li
                           key={(obj as any).id || (obj as any).name || index}
-                          className={`flex items-center justify-between bg-gray-700 px-3 py-2 rounded
+                          className={`flex items-center justify-between bg-[#303030] px-3 py-2 rounded
                             ${
                               isSelected
                                 ? "ring-2 ring-offset-2 ring-purple-400"
