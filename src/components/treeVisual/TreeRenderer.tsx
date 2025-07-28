@@ -68,7 +68,7 @@ export default function RenderTree({
         const bgColor =
           isDragOver && isLayout && draggedNodeId !== null
             ? "bg-[#999999]"
-            : "hover:bg-gray-700";
+            : "hover:bg-[#252525]";
         // console.log("✅✅✅", draggedNodeId, dragOverNodeId);
         return (
           <li key={node.id}>

@@ -161,18 +161,18 @@ export default function Editor() {
   return (
     <div className="h-screen bg-[#1a1a1a] flex flex-col">
       {/* 상단 툴바 */}
-      <header className="bg-[#1a1a1a] border-b border-gray-700 px-4 py-2">
+      <header className="bg-[#1a1a1a] border-b border-[#000000] px-4 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#28e0b2] rounded-lg flex items-center justify-center">
                 <Palette size={16} className="text-white" />
               </div>
               <h1 className="text-xl font-bold text-white">Leaf</h1>
             </div>
 
             <div className="flex items-center space-x-1">
-              <button className="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm flex items-center space-x-1">
+              <button className="px-3 py-1.5 bg-[#28e0b2] text-white rounded-md hover:bg-[#259478] transition-colors text-sm flex items-center space-x-1">
                 <Save size={14} />
                 <span>Save</span>
               </button>
@@ -252,25 +252,25 @@ export default function Editor() {
 
       <div className="flex-1 flex">
         {/* 왼쪽 사이드바 */}
-        <div className="w-64 bg-[#1a1a1a] border-r border-gray-700 flex flex-col">
+        <div className="w-64 bg-[#1a1a1a] border-r border-[#000000] flex flex-col">
           {/* 탭 네비게이션 */}
-          <div className="flex border-b border-gray-700">
+          <div className="flex border-b border-[#000000]">
             <button
               onClick={() => setActiveTab("shapes")}
               className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
                 activeTab === "shapes"
-                  ? "bg-[#1a1a1a] text-white border-b-2 border-blue-500"
-                  : "text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
+                  ? "bg-[#1a1a1a] text-white border-b-2 border-[#28e0b2]"
+                  : "text-gray-400 hover:text-white hover:bg-[#252525]"
               }`}
             >
-              Shapes
+              Elements
             </button>
             <button
               onClick={() => setActiveTab("layers")}
               className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
                 activeTab === "layers"
-                  ? "bg-[#1a1a1a] text-white border-b-2 border-blue-500"
-                  : "text-gray-400 hover:text-white hover:bg-[#1a1a1a]"
+                  ? "bg-[#1a1a1a] text-white border-b-2 border-[#28e0b2]"
+                  : "text-gray-400 hover:text-white hover:bg-[#252525]"
               }`}
             >
               Layers
@@ -403,8 +403,8 @@ export default function Editor() {
         </div>
 
         {/* 오른쪽 속성 패널 */}
-        <div className="w-80 bg-[#1a1a1a] border-l border-gray-700 flex flex-col">
-          <div className="p-4 border-b border-gray-700">
+        <div className="w-80 bg-[#1a1a1a] border-l border-[#000000] flex flex-col">
+          <div className="p-4 border-b border-[#000000]">
             <h2 className="text-lg font-semibold text-white">Properties</h2>
           </div>
 
@@ -413,7 +413,7 @@ export default function Editor() {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <div className="w-3 h-3 bg-[#28e0b2] rounded-full"></div>
                     <span className="text-sm font-medium text-gray-300">
                       Selected Object
                     </span>
@@ -458,7 +458,7 @@ export default function Editor() {
                       onChange={(e) =>
                         handlePropertyChange("fill", e.target.value)
                       }
-                      className="flex-1 px-3 py-2 bg-[#303030] border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-3 py-2 bg-[#303030] border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#28e0b2]"
                     />
                   </div>
                 </div>
@@ -483,7 +483,7 @@ export default function Editor() {
                       onChange={(e) =>
                         handlePropertyChange("stroke", e.target.value)
                       }
-                      className="flex-1 px-3 py-2 bg-[#303030] border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-3 py-2 bg-[#303030] border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#28e0b2]"
                     />
                   </div>
 
@@ -591,7 +591,7 @@ export default function Editor() {
                 {/* Zindex */}
                 <div className="space-y-4 text-white">
                   <h3 className="text-sm font-medium text-gray-300">z-index</h3>
-                  <ul className="space-y-1 mt-2">
+                  <ul className="space-y-1 mt-2 max-h-[250px]">
                     {objectOrder.map((obj, index) => {
                       const isSelected = selectedObject === obj;
 
@@ -622,7 +622,7 @@ export default function Editor() {
                                   fabricCanvas
                                 )
                               }
-                              className={`px-2 py-1 rounded bg-blue-600 hover:bg-blue-700 disabled:opacity-50`}
+                              className={`px-2 py-1 rounded bg-[#28e0b2] hover:bg-[#259478] disabled:opacity-10`}
                             >
                               ▲
                             </button>
@@ -636,7 +636,7 @@ export default function Editor() {
                                   fabricCanvas
                                 )
                               }
-                              className={`px-2 py-1 rounded bg-blue-600 hover:bg-blue-700 disabled:opacity-50`}
+                              className={`px-2 py-1 rounded bg-[#28e0b2] hover:bg-[#259478] disabled:opacity-10`}
                             >
                               ▼
                             </button>
