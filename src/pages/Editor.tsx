@@ -281,10 +281,10 @@ export default function Editor() {
           <div className="flex-1 p-4">
             {activeTab === "shapes" ? (
               <div className="space-y-3">
+                {/* 레이아웃 */}
                 <h3 className="text-sm font-semibold text-gray-300 mb-3">
-                  Basic Shapes
+                  Frame
                 </h3>
-
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => addShape("layout")}
@@ -296,6 +296,12 @@ export default function Editor() {
                     />
                     <span className="text-xs text-gray-300">Layout</span>
                   </button>
+                </div>
+                {/* 기초 도형 */}
+                <h3 className="text-sm font-semibold text-gray-300 mb-3">
+                  Basic Shapes
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => addShape("circle")}
                     className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
@@ -339,6 +345,11 @@ export default function Editor() {
                     />
                     <span className="text-xs text-gray-300">Text</span>
                   </button>
+                </div>
+                <h3 className="text-sm font-semibold text-gray-300 mb-3">
+                  Additional elements
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => createImage(fabricCanvas.current)}
                     className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
