@@ -50,9 +50,7 @@ interface TreeNode {
 export default function Editor() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricCanvas = useRef<fabric.Canvas | null>(null);
-  const [selectedObject, setSelectedObject] = useState<any | null>(
-    null
-  );
+  const [selectedObject, setSelectedObject] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState("shapes");
   const [objectProperties, setObjectProperties] = useState({
     fill: "#ff0000",
@@ -200,7 +198,9 @@ export default function Editor() {
                 onClick={() => {
                   if (!fabricCanvas.current) return;
                   const canvasWidth = fabricCanvas.current.getWidth();
-                  const canvasHeight = fabricCanvas.current.getHeight();
+                  // const canvasHeight = fabricCanvas.current.getHeight();
+                  const canvasHeight = 800;
+
                   const screenWidth = window.screen.width;
                   const screenHeight = window.screen.height;
                   console.log(screenWidth, screenHeight);
@@ -236,7 +236,9 @@ export default function Editor() {
                     </style>
                   </head>
                   <body>
-                    <div style="
+                    <div 
+                      id="main"
+                      style="
                       position: absolute;
                       top: 50%;
                       left: 50%;
@@ -248,95 +250,118 @@ export default function Editor() {
                     ">
                       ${code}
                     </div>
-
                   <script>
-                    document.addEventListener('DOMContentLoaded', () => {
-                      const observer = new IntersectionObserver((entries) => {
-                        entries.forEach(entry => {
-                          if (!entry.isIntersecting) return;
+  document.addEventListener('DOMContentLoaded', () => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
 
-                          const el = entry.target;
-                          const animation = el.getAttribute('data-animation');
-                          if (!animation) return;
+        const el = entry.target;
+        const animation = el.getAttribute('data-animation');
+        if (!animation) return;
 
-                          if (el.dataset.animated === 'true') return;
-                          el.dataset.animated = 'true';
+        if (el.dataset.animated === 'true') return;
+        el.dataset.animated = 'true';
 
-                          el.style.transition = 'all 0.8s ease';
+        el.style.transition = 'all 0.8s ease';
 
-                          switch (animation) {
-                            case 'fadeIn':
-                              el.style.opacity = '1';
-                              break;
-                            case 'up':
-                              el.style.transform = 'translateY(0)';
-                              el.style.opacity = '1';
-                              break;
-                            case 'down':
-                              el.style.transform = 'translateY(0)';
-                              el.style.opacity = '1';
-                              break;
-                            case 'left':
-                              el.style.transform = 'translateX(0)';
-                              el.style.opacity = '1';
-                              break;
-                            case 'right':
-                              el.style.transform = 'translateX(0)';
-                              el.style.opacity = '1';
-                              break;
-                            case 'scaleUp':
-                              el.style.transform = 'scale(1)';
-                              el.style.opacity = '1';
-                              break;
-                            case 'scaleDown':
-                              el.style.transform = 'scale(1)';
-                              el.style.opacity = '1';
-                              break;
-                            case 'fixed':
-                              // 일단 대기
-                              break;
-                          }
-                        });
-                      }, { threshold: 0.1 });
+        switch (animation) {
+          case 'fadeIn':
+            el.style.opacity = '1';
+            break;
+          case 'up':
+          case 'down':
+            el.style.transform = 'translateY(0)';
+            el.style.opacity = '1';
+            break;
+          case 'left':
+          case 'right':
+            el.style.transform = 'translateX(0)';
+            el.style.opacity = '1';
+            break;
+          case 'scaleUp':
+          case 'scaleDown':
+            el.style.transform = 'scale(1)';
+            el.style.opacity = '1';
+            break;
+          case 'sticky':
+            // 따로 처리하므로 여기서는 스킵
+            break;
+        }
+      });
+    }, { threshold: 0.1 });
 
-                      document.querySelectorAll('[data-animation]').forEach(el => {
-                        const animation = el.getAttribute('data-animation');
-                        el.style.opacity = '0';
+    document.querySelectorAll('[data-animation]').forEach(el => {
+      const animation = el.getAttribute('data-animation');
+      el.style.opacity = '0';
 
-                        switch (animation) {
-                          case 'up':
-                            el.style.transform = 'translateY(70px)';
-                            break;
-                          case 'down':
-                            el.style.transform = 'translateY(-70px)';
-                            break;
-                          case 'left':
-                            el.style.transform = 'translateX(70px)';
-                            break;
-                          case 'right':
-                            el.style.transform = 'translateX(-70px)';
-                            break;
-                          case 'scaleUp':
-                            el.style.transform = 'scale(0.7)';
-                            break;
-                          case 'scaleDown':
-                            el.style.transform = 'scale(1.4)';
-                            break;
-                          case 'fadeIn':
-                            break;
-                          case 'fixed':
-                            el.style.opacity = '1'; // 일단대기
-                            return; 
-                        }
+      switch (animation) {
+        case 'up':
+          el.style.transform = 'translateY(70px)';
+          break;
+        case 'down':
+          el.style.transform = 'translateY(-70px)';
+          break;
+        case 'left':
+          el.style.transform = 'translateX(70px)';
+          break;
+        case 'right':
+          el.style.transform = 'translateX(-70px)';
+          break;
+        case 'scaleUp':
+          el.style.transform = 'scale(0.7)';
+          break;
+        case 'scaleDown':
+          el.style.transform = 'scale(1.4)';
+          break;
+        case 'fadeIn':
+          // opacity만 조정하므로 transform은 X
+          break;
+        case 'sticky':
+          el.style.opacity = '1';
+          el.style.position = 'relative';
+          el.style.top = el.style.marginTop;
 
-                        observer.observe(el);
-                      });
-                    });
-                  </script>
+          const marginTopInt = parseInt(el.style.marginTop.replace('px', ''), 10);
+          const main = document.getElementById('main');
+
+          if (main) {
+            let isFixed = false;
+            let isStickyStarted = false;
+
+            main.addEventListener('scroll', () => {
+              const scrollTop = main.scrollTop;
+              const rect = el.getBoundingClientRect();
+              const windowHeight = window.innerHeight;
+
+              // 요소가 화면의 절반 위치에 도달하면 sticky 동작 시작
+              if (!isStickyStarted && (rect.top + (rect.height / 2 )) <= windowHeight / 2) {
+                el.style.position = 'sticky';
+                el.style.top = \`\${windowHeight / 2 - rect.height / 2}px\`;
+                isStickyStarted = true;
+              }
+
+              // 일정 스크롤 이후 fixed → relative 전환
+              if (isStickyStarted && scrollTop > marginTopInt + 2000 && !isFixed) { // 이거 2000 수치 나중에 알아서 조정하자
+                el.style.position = 'relative';
+                el.style.marginTop = \`\${scrollTop}px\`; 
+                isFixed = true;
+              }
+            });
+          }
+          return;
+
+
+              }
+
+              observer.observe(el);
+            });
+          });
+        </script>
+
                   </body>
                   </html>
                   `);
-
                 }}
                 className="px-3 py-1.5 bg-[#1a1a1a] text-gray-200 rounded-md hover:bg-[#252525] transition-colors text-sm flex items-center space-x-1"
               >
@@ -682,7 +707,9 @@ export default function Editor() {
                         {["left", "center", "right"].map((pos) => (
                           <button
                             key={pos}
-                            onClick={() => handleSelfAlign(pos, fabricCanvas, tree)}
+                            onClick={() =>
+                              handleSelfAlign(pos, fabricCanvas, tree)
+                            }
                             className="flex flex-1 items-center justify-center gap-1 py-2 bg-[#303030] hover:bg-[#252525] rounded-md text-sm text-gray-200 transition-all"
                           >
                             {pos === "left" && <AlignLeft size={16} />}
@@ -698,77 +725,111 @@ export default function Editor() {
 
                 {/* Animation */}
                 <div className="space-y-4 text-white">
-                  <h3 className="text-sm font-medium text-gray-300">Animation</h3>
+                  <h3 className="text-sm font-medium text-gray-300">
+                    Animation
+                  </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px]">
                     <button
-                      onClick={() => applyAnimation('up')}
+                      onClick={() => applyAnimation("up")}
                       className={`flex justify-evenly items-center gap-1 px-2 h-[55px] rounded-lg font-medium transition transform hover:scale-105 bg-green-600 hover:bg-green-500
-                        ${selectedObject?.animation === 'up' ? 'ring-2 ring-white scale-105 shadow-lg' : ''}`}
+                        ${
+                          selectedObject?.animation === "up"
+                            ? "ring-2 ring-white scale-105 shadow-lg"
+                            : ""
+                        }`}
                     >
                       <ArrowUp size={12} />
                       Up
                     </button>
                     <button
-                      onClick={() => applyAnimation('down')}
+                      onClick={() => applyAnimation("down")}
                       className={`flex justify-evenly items-center gap-1 px-2 h-[55px] rounded-lg font-medium transition transform hover:scale-105 bg-blue-600 hover:bg-blue-500
-                        ${selectedObject?.animation === 'down' ? 'ring-2 ring-white scale-105 shadow-lg' : ''}`}
+                        ${
+                          selectedObject?.animation === "down"
+                            ? "ring-2 ring-white scale-105 shadow-lg"
+                            : ""
+                        }`}
                     >
                       <ArrowDown size={12} />
                       Down
                     </button>
 
                     <button
-                      onClick={() => applyAnimation('right')}
+                      onClick={() => applyAnimation("right")}
                       className={`flex justify-evenly items-center gap-1 px-2 h-[55px] rounded-lg font-medium transition transform hover:scale-105 bg-orange-600 hover:bg-orange-500
-                        ${selectedObject?.animation === 'right' ? 'ring-2 ring-white scale-105 shadow-lg' : ''}`}
+                        ${
+                          selectedObject?.animation === "right"
+                            ? "ring-2 ring-white scale-105 shadow-lg"
+                            : ""
+                        }`}
                     >
                       <ArrowRight size={12} />
                       Right
                     </button>
 
                     <button
-                      onClick={() => applyAnimation('left')}
+                      onClick={() => applyAnimation("left")}
                       className={`flex justify-evenly items-center gap-1 px-2 h-[55px] rounded-lg font-medium transition transform hover:scale-105 bg-yellow-600 hover:bg-yellow-500
-                        ${selectedObject?.animation === 'left' ? 'ring-2 ring-white scale-105 shadow-lg' : ''}`}
+                        ${
+                          selectedObject?.animation === "left"
+                            ? "ring-2 ring-white scale-105 shadow-lg"
+                            : ""
+                        }`}
                     >
                       <ArrowLeft size={12} />
                       Left
                     </button>
 
                     <button
-                      onClick={() => applyAnimation('scaleUp')}
+                      onClick={() => applyAnimation("scaleUp")}
                       className={`flex justify-evenly items-center gap-1 px-2 h-[55px] rounded-lg font-medium transition transform hover:scale-105 bg-purple-600 hover:bg-purple-500
-                        ${selectedObject?.animation === 'scaleUp' ? 'ring-2 ring-white scale-105 shadow-lg' : ''}`}
+                        ${
+                          selectedObject?.animation === "scaleUp"
+                            ? "ring-2 ring-white scale-105 shadow-lg"
+                            : ""
+                        }`}
                     >
                       <ZoomIn size={12} />
                       Scale Up
                     </button>
 
                     <button
-                      onClick={() => applyAnimation('scaleDown')}
+                      onClick={() => applyAnimation("scaleDown")}
                       className={`flex justify-evenly items-center gap-1 px-2 h-[55px] rounded-lg font-medium transition transform hover:scale-105 bg-pink-600 hover:bg-pink-500
-                        ${selectedObject?.animation === 'scaleDown' ? 'ring-2 ring-white scale-105 shadow-lg' : ''}`}
+                        ${
+                          selectedObject?.animation === "scaleDown"
+                            ? "ring-2 ring-white scale-105 shadow-lg"
+                            : ""
+                        }`}
                     >
                       <ZoomOut size={12} />
                       Scale Down
                     </button>
 
                     <button
-                      onClick={() => applyAnimation('fadeIn')}
+                      onClick={() => applyAnimation("fadeIn")}
                       className={`flex justify-evenly items-center gap-1 px-2 h-[55px] rounded-lg font-medium transition transform hover:scale-105 bg-gray-400 hover:bg-gray-500
-                        ${selectedObject?.animation === 'fadeIn' ? 'ring-2 ring-white scale-105 shadow-lg' : ''}`}
+                        ${
+                          selectedObject?.animation === "fadeIn"
+                            ? "ring-2 ring-white scale-105 shadow-lg"
+                            : ""
+                        }`}
                     >
                       <ZoomOut size={12} />
                       Fade In
                     </button>
 
                     <button
-                      onClick={() => applyAnimation('fixed')}
+                      onClick={() => applyAnimation("sticky")}
                       className={`flex justify-evenly items-center gap-1 px-2 h-[55px] rounded-lg font-medium transition transform hover:scale-105 bg-gray-600 hover:bg-gray-500
-                        ${selectedObject?.animation === 'fixed' ? 'ring-2 ring-white scale-105 shadow-lg' : ''}`}
+                        ${
+                          selectedObject?.animation === "sticky"
+                            ? "ring-2 ring-white scale-105 shadow-lg"
+                            : ""
+                        }`}
                     >
                       <Move size={12} />
-                      Fixed
+                      Sticky
                     </button>
                   </div>
                 </div>
@@ -784,11 +845,7 @@ export default function Editor() {
                         <li
                           key={(obj as any).id || (obj as any).name || index}
                           className={`flex items-center justify-between bg-[#303030] px-3 py-2 rounded
-                            ${
-                              isSelected
-                                ? "ring-2  ring-[#28e0b2]"
-                                : ""
-                            }
+                            ${isSelected ? "ring-2  ring-[#28e0b2]" : ""}
                           `}
                           tabIndex={isSelected ? 0 : -1} // 선택된 아이템에만 tab 포커스 가능
                         >

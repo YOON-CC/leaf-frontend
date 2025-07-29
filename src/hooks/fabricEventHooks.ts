@@ -30,7 +30,7 @@ export const useInitCanvas = ({
     fabricCanvas.current = new fabric.Canvas(canvasRef.current, {
       backgroundColor: "#ffffff",
       width: 1200,
-      height: 800,
+      height: 5000,
     });
 
     const canvas = fabricCanvas.current;
