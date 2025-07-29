@@ -320,10 +320,15 @@ export default function Editor() {
         case 'sticky':
           el.style.opacity = '1';
           el.style.position = 'relative';
-          el.style.top = el.style.marginTop;
+          // el.style.marginTop = el.style.marginTop;
 
           const marginTopInt = parseInt(el.style.marginTop.replace('px', ''), 10);
           const main = document.getElementById('main');
+
+          console.log(el.style.marginTop,window.innerHeight)
+          let trigger = false;
+
+
 
           if (main) {
             let isFixed = false;
@@ -336,8 +341,21 @@ export default function Editor() {
 
               // 요소가 화면의 절반 위치에 도달하면 sticky 동작 시작
               if (!isStickyStarted && (rect.top + (rect.height / 2 )) <= windowHeight / 2) {
+                console.log("zzz", marginTopInt, windowHeight/2)
+
+                if((marginTopInt+(rect.height / 2 )) < windowHeight/2){
+                  trigger = true
+                }
                 el.style.position = 'sticky';
-                el.style.top = \`\${windowHeight / 2 - rect.height / 2}px\`;
+
+                if(trigger){
+                  el.style.top = \`\${marginTopInt}px\`;
+                }
+
+                if(!trigger){
+                  el.style.top = \`\${windowHeight / 2-rect.height / 2}px\`;
+                }
+
                 isStickyStarted = true;
               }
 
