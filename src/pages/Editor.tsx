@@ -221,163 +221,147 @@ export default function Editor() {
                   setExportFile(`
                   <!DOCTYPE html>
                   <html lang="en">
-                  <head>
-                    <meta charset="UTF-8" />
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                    <title>Exported Tree</title>
-                    <style>
-                      body {
-                        position: relative;
-                        width: 100%;
-                        height: 100vh;
-                        margin: 0;
-                        background-color: gray;
-                      }
-                    </style>
-                  </head>
-                  <body>
-                    <div 
-                      id="main"
-                      style="
-                      position: absolute;
-                      top: 50%;
-                      left: 50%;
-                      transform: translate(-50%, -50%);
-                      background-color: white;
-                      height: 100vh;
-                      width: ${screenWidth}px;
-                      overflow: auto;
-                    ">
-                      ${code}
-                    </div>
-                  <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
+                    <head>
+                      <meta charset="UTF-8" />
+                      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                      <title>Exported Tree</title>
+                      <style>
+                        body {
+                          position: relative;
+                          width: 100%;
+                          height: 100vh;
+                          margin: 0;
+                          background-color: gray;
+                        }
+                      </style>
+                    </head>
+                    <body>
+                      <div 
+                        id="main"
+                        style="
+                          position: absolute;
+                          top: 50%;
+                          left: 50%;
+                          transform: translate(-50%, -50%);
+                          background-color: white;
+                          height: 100vh;
+                          width: ${screenWidth}px;
+                          overflow: auto;
+                        "
+                      >
+                        ${code}
+                      </div>
 
-        const el = entry.target;
-        const animation = el.getAttribute('data-animation');
-        if (!animation) return;
+                      <script>
+                        document.addEventListener('DOMContentLoaded', () => {
+                          const observer = new IntersectionObserver((entries) => {
+                            entries.forEach(entry => {
+                              if (!entry.isIntersecting) return;
 
-        if (el.dataset.animated === 'true') return;
-        el.dataset.animated = 'true';
+                              const el = entry.target;
+                              const animation = el.getAttribute('data-animation');
+                              if (!animation || el.dataset.animated === 'true') return;
 
-        el.style.transition = 'all 0.8s ease';
+                              el.dataset.animated = 'true';
+                              el.style.transition = 'all 0.8s ease';
 
-        switch (animation) {
-          case 'fadeIn':
-            el.style.opacity = '1';
-            break;
-          case 'up':
-          case 'down':
-            el.style.transform = 'translateY(0)';
-            el.style.opacity = '1';
-            break;
-          case 'left':
-          case 'right':
-            el.style.transform = 'translateX(0)';
-            el.style.opacity = '1';
-            break;
-          case 'scaleUp':
-          case 'scaleDown':
-            el.style.transform = 'scale(1)';
-            el.style.opacity = '1';
-            break;
-          case 'sticky':
-            // 따로 처리하므로 여기서는 스킵
-            break;
-        }
-      });
-    }, { threshold: 0.1 });
+                              switch (animation) {
+                                case 'fadeIn':
+                                  el.style.opacity = '1';
+                                  break;
+                                case 'up':
+                                case 'down':
+                                  el.style.transform = 'translateY(0)';
+                                  el.style.opacity = '1';
+                                  break;
+                                case 'left':
+                                case 'right':
+                                  el.style.transform = 'translateX(0)';
+                                  el.style.opacity = '1';
+                                  break;
+                                case 'scaleUp':
+                                case 'scaleDown':
+                                  el.style.transform = 'scale(1)';
+                                  el.style.opacity = '1';
+                                  break;
+                                case 'sticky':
+                                  // handled separately
+                                  break;
+                              }
+                            });
+                          }, { threshold: 0.1 });
 
-    document.querySelectorAll('[data-animation]').forEach(el => {
-      const animation = el.getAttribute('data-animation');
-      el.style.opacity = '0';
+                          document.querySelectorAll('[data-animation]').forEach(el => {
+                            const animation = el.getAttribute('data-animation');
+                            el.style.opacity = '0';
 
-      switch (animation) {
-        case 'up':
-          el.style.transform = 'translateY(70px)';
-          break;
-        case 'down':
-          el.style.transform = 'translateY(-70px)';
-          break;
-        case 'left':
-          el.style.transform = 'translateX(70px)';
-          break;
-        case 'right':
-          el.style.transform = 'translateX(-70px)';
-          break;
-        case 'scaleUp':
-          el.style.transform = 'scale(0.7)';
-          break;
-        case 'scaleDown':
-          el.style.transform = 'scale(1.4)';
-          break;
-        case 'fadeIn':
-          // opacity만 조정하므로 transform은 X
-          break;
-        case 'sticky':
-          el.style.opacity = '1';
-          el.style.position = 'relative';
-          // el.style.marginTop = el.style.marginTop;
+                            switch (animation) {
+                              case 'up':
+                                el.style.transform = 'translateY(70px)';
+                                break;
+                              case 'down':
+                                el.style.transform = 'translateY(-70px)';
+                                break;
+                              case 'left':
+                                el.style.transform = 'translateX(70px)';
+                                break;
+                              case 'right':
+                                el.style.transform = 'translateX(-70px)';
+                                break;
+                              case 'scaleUp':
+                                el.style.transform = 'scale(0.7)';
+                                break;
+                              case 'scaleDown':
+                                el.style.transform = 'scale(1.4)';
+                                break;
+                              case 'fadeIn':
+                                // no transform needed
+                                break;
+                              case 'sticky':
+                                el.style.opacity = '1';
+                                el.style.position = 'relative';
 
-          const marginTopInt = parseInt(el.style.marginTop.replace('px', ''), 10);
-          const main = document.getElementById('main');
+                                const marginTopInt = parseInt(el.style.marginTop.replace('px', ''), 10);
+                                const main = document.getElementById('main');
+                                let trigger = false;
 
-          console.log(el.style.marginTop,window.innerHeight)
-          let trigger = false;
+                                if (main) {
+                                  let isFixed = false;
+                                  let isStickyStarted = false;
 
+                                  main.addEventListener('scroll', () => {
+                                    const scrollTop = main.scrollTop;
+                                    const rect = el.getBoundingClientRect();
+                                    const windowHeight = window.innerHeight;
 
+                                    if (!isStickyStarted && (rect.top + rect.height / 2) <= windowHeight / 2) {
+                                      if ((marginTopInt + rect.height / 2) < windowHeight / 2) {
+                                        trigger = true;
+                                      }
 
-          if (main) {
-            let isFixed = false;
-            let isStickyStarted = false;
+                                      el.style.position = 'sticky';
+                                      el.style.top = trigger
+                                        ? \`\${marginTopInt}px\`
+                                        : \`\${windowHeight / 2 - rect.height / 2}px\`;
 
-            main.addEventListener('scroll', () => {
-              const scrollTop = main.scrollTop;
-              const rect = el.getBoundingClientRect();
-              const windowHeight = window.innerHeight;
+                                      isStickyStarted = true;
+                                    }
 
-              // 요소가 화면의 절반 위치에 도달하면 sticky 동작 시작
-              if (!isStickyStarted && (rect.top + (rect.height / 2 )) <= windowHeight / 2) {
-                console.log("zzz", marginTopInt, windowHeight/2)
+                                    if (isStickyStarted && scrollTop > marginTopInt + 2000 && !isFixed) {
+                                      el.style.position = 'relative';
+                                      el.style.marginTop = \`\${scrollTop}px\`;
+                                      isFixed = true;
+                                    }
+                                  });
+                                }
+                                return;
+                            }
 
-                if((marginTopInt+(rect.height / 2 )) < windowHeight/2){
-                  trigger = true
-                }
-                el.style.position = 'sticky';
-
-                if(trigger){
-                  el.style.top = \`\${marginTopInt}px\`;
-                }
-
-                if(!trigger){
-                  el.style.top = \`\${windowHeight / 2-rect.height / 2}px\`;
-                }
-
-                isStickyStarted = true;
-              }
-
-              // 일정 스크롤 이후 fixed → relative 전환
-              if (isStickyStarted && scrollTop > marginTopInt + 2000 && !isFixed) { // 이거 2000 수치 나중에 알아서 조정하자
-                el.style.position = 'relative';
-                el.style.marginTop = \`\${scrollTop}px\`; 
-                isFixed = true;
-              }
-            });
-          }
-          return;
-
-
-              }
-
-              observer.observe(el);
-            });
-          });
-        </script>
-
-                  </body>
+                            observer.observe(el);
+                          });
+                        });
+                      </script>
+                    </body>
                   </html>
                   `);
                 }}
