@@ -45,6 +45,10 @@ const generateUnlinkedNodeCode = (
   const object = node.object as any;
   console.log(object.shapeType, object, imageData[node.id]);
 
+  // 애니메이션 출력
+  const animation = object.animation || "";
+  const animationAttr = `data-animation="${animation}"`;
+
   // 이미지의 경우
   if (object.shapeType === "image") {
     const indentSpace = " ".repeat(indent * 2);
@@ -64,12 +68,12 @@ const generateUnlinkedNodeCode = (
       .trim()
       .replace(/\s+/g, " ");
 
-    const divStart = `${indentSpace}<img id="${id}" src="${object.src}" style="${style}"/>`;
+    const divStart = `${indentSpace}<img id="${id}" src="${object.src}" style="${style}"  ${animationAttr}/>`;
 
     return [divStart].join("\n");
   }
-  // 이미지가 아닌경우
 
+  // 이미지가 아닌경우
   const indentSpace = " ".repeat(indent * 2);
   const id = node.id;
 
@@ -92,7 +96,7 @@ const generateUnlinkedNodeCode = (
     .trim()
     .replace(/\s+/g, " ");
 
-  const divStart = `${indentSpace}<div id="${id}" style="${style}">`;
+  const divStart = `${indentSpace}<div id="${id}" style="${style}"  ${animationAttr}>`;
   const divEnd = `${indentSpace}</div>`;
 
   return [divStart, divEnd].join("\n");
@@ -126,6 +130,7 @@ const generateTreeNodeCode = (
   const isRoot = indent === 0;
 
   let style = "";
+  
   if (isRoot) {
     style = `
       position: absolute;
