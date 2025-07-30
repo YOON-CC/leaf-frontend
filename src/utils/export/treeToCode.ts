@@ -43,40 +43,45 @@ const generateUnlinkedNodeCode = (
   imageData: any
 ): string => {
   const object = node.object as any;
-  console.log(object.shapeType, object, imageData[node.id]);
-
-  // 애니메이션 출력
   const animation = object.animation || "";
   const animationAttr = `data-animation="${animation}"`;
+  const indentSpace = " ".repeat(indent * 2);
+  const id = node.id;
 
-  // 이미지의 경우
+  // 그림자 CSS 문자열 생성
+  let boxShadowStyle = "";
+  if (object.shadow) {
+    const {
+      color = "rgba(0,0,0,0.5)",
+      blur = 3,
+      offsetX = 0,
+      offsetY = 0,
+    } = object.shadow;
+    boxShadowStyle = `box-shadow: ${offsetX}px ${offsetY}px ${blur}px ${color};`;
+  }
+
+  // 이미지일 경우
   if (object.shapeType === "image") {
-    const indentSpace = " ".repeat(indent * 2);
-    const id = node.id;
     const width = (imageData[node.id][0] || 0) * scaleX;
     const height = (imageData[node.id][1] || 0) * scaleY;
     const left = (object.left || 0) * scaleX;
     const top = (object.top || 0) * scaleY;
 
     const style = `
-    position: absolute;
-    width: ${width}px;
-    height: ${height}px;
-    margin-left: ${left}px;
-    margin-top: ${top}px;
-  `
+      position: absolute;
+      width: ${width}px;
+      height: ${height}px;
+      margin-left: ${left}px;
+      margin-top: ${top}px;
+      ${boxShadowStyle}
+    `
       .trim()
       .replace(/\s+/g, " ");
 
-    const divStart = `${indentSpace}<img id="${id}" src="${object.src}" style="${style}"  ${animationAttr}/>`;
-
-    return [divStart].join("\n");
+    return `${indentSpace}<img id="${id}" src="${object.src}" style="${style}" ${animationAttr}/>`;
   }
 
-  // 이미지가 아닌경우
-  const indentSpace = " ".repeat(indent * 2);
-  const id = node.id;
-
+  // 일반 도형일 경우
   const width = (object.width || 0) * scaleX;
   const height = (object.height || 0) * scaleY;
   const left = (object.left || 0) * scaleX;
@@ -92,17 +97,14 @@ const generateUnlinkedNodeCode = (
     border: 1px solid ${stroke};
     margin-left: ${left}px;
     margin-top: ${top}px;
+    ${boxShadowStyle}
   `
     .trim()
     .replace(/\s+/g, " ");
 
-  const divStart = `${indentSpace}<div id="${id}" style="${style}"  ${animationAttr}>`;
-  const divEnd = `${indentSpace}</div>`;
-
-  return [divStart, divEnd].join("\n");
+  return `${indentSpace}<div id="${id}" style="${style}" ${animationAttr}></div>`;
 };
 
-// 계층 코드 관리
 // 계층 코드 관리
 const generateTreeNodeCode = (
   node: TreeNode,
@@ -115,7 +117,6 @@ const generateTreeNodeCode = (
 ): string => {
   const indentSpace = " ".repeat(indent * 2);
   const id = node.id;
-
   const object = node.object as any;
 
   const width = (object.width ?? 0) * scaleX;
@@ -132,6 +133,17 @@ const generateTreeNodeCode = (
 
   let style = "";
 
+  // ✅ 그림자 처리
+  const shadow = object.shadow;
+  let boxShadow = "";
+  if (shadow) {
+    const shadowOffsetX = (shadow.offsetX ?? 0) * scaleX;
+    const shadowOffsetY = (shadow.offsetY ?? 0) * scaleY;
+    const shadowBlur = (shadow.blur ?? 0) * Math.max(scaleX, scaleY);
+    const shadowColor = shadow.color || "rgba(0,0,0,0.5)";
+    boxShadow = `box-shadow: ${shadowOffsetX}px ${shadowOffsetY}px ${shadowBlur}px ${shadowColor};`;
+  }
+
   if (isRoot) {
     style = `
       position: absolute;
@@ -141,20 +153,22 @@ const generateTreeNodeCode = (
       border: 1px solid ${stroke};
       margin-left: ${left}px;
       margin-top: ${top}px;
+      ${boxShadow}
     `;
   } else {
     const childrenLeft = left - parentLeft;
     const childrenTop = top - parentTop;
 
     if (object.shapeType === "image") {
-      const imageWidth = (imageData[node.id]?.[0] || 0) * scaleX;
-      const imageHeight = (imageData[node.id]?.[1] || 0) * scaleY;
+      const imageWidth = (imageData?.[node.id]?.[0] || 0) * scaleX;
+      const imageHeight = (imageData?.[node.id]?.[1] || 0) * scaleY;
       style = `
         position: absolute;
         width: ${imageWidth}px;
         height: ${imageHeight}px;
         margin-left: ${childrenLeft}px;
         margin-top: ${childrenTop}px;
+        ${boxShadow}
       `;
     } else {
       style = `
@@ -165,15 +179,16 @@ const generateTreeNodeCode = (
         border: 1px solid ${stroke};
         margin-left: ${childrenLeft}px;
         margin-top: ${childrenTop}px;
+        ${boxShadow}
       `;
     }
   }
 
   style = style.trim().replace(/\s+/g, " ");
 
-  // 이미지 태그 처리
+  // 이미지 처리
   if (object.shapeType === "image") {
-    const divStart = `${indentSpace}<img id="${id}" src="${object.src}" style="${style}"${animationAttr}/>`;
+    const imgTag = `${indentSpace}<img id="${id}" src="${object.src}" style="${style}"${animationAttr}/>`;
     const childrenCode = (node.children || [])
       .map((child) =>
         generateTreeNodeCode(
@@ -187,10 +202,10 @@ const generateTreeNodeCode = (
         )
       )
       .join("\n");
-    return [divStart, childrenCode].join("\n");
+    return [imgTag, childrenCode].join("\n");
   }
 
-  // div 태그 처리
+  // 일반 div 처리
   const divStart = `${indentSpace}<div id="${id}" style="${style}"${animationAttr}>`;
   const childrenCode = (node.children || [])
     .map((child) =>
