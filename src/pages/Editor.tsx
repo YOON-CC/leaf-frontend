@@ -178,6 +178,87 @@ export default function Editor() {
     fabricCanvas.current?.requestRenderAll();
   };
 
+  // 그림자
+  const [shadowColor, setShadowColor] = useState("#000000");
+  const [shadowBlur, setShadowBlur] = useState(3);
+  const [shadowOffset, setShadowOffset] = useState({ x: 3, y: 3 }); // 기본값
+
+  const shadows = [
+    { name: "shadow 1", x: -4, y: -4 },
+    { name: "shadow 2", x: 0, y: -4 },
+    { name: "shadow 3", x: 4, y: -4 },
+    { name: "shadow 4", x: -4, y: 0 },
+    { name: "shadow 5", x: 0, y: 0 },
+    { name: "shadow 6", x: 4, y: 0 },
+    { name: "shadow 7", x: -4, y: 4 },
+    { name: "shadow 8", x: 0, y: 4 },
+    { name: "shadow 9", x: 4, y: 4 },
+  ];
+
+  // 그림자 속성 업데이트 함수
+  const applyShadow = (color: any, blur: any, offsetX: any, offsetY: any) => {
+    if (!selectedObject || !fabricCanvas.current) return;
+
+    const shadow = new fabric.Shadow({
+      color,
+      blur,
+      offsetX,
+      offsetY,
+    });
+
+    selectedObject.set("shadow", shadow);
+    fabricCanvas.current.renderAll();
+
+    setObjectProperties((prev) => ({
+      ...prev,
+      shadowColor: color,
+      shadowBlur: blur,
+      shadowOffsetX: offsetX,
+      shadowOffsetY: offsetY,
+    }));
+  };
+
+  // 컬러 혹은 블러 변경 시 기존 offset 유지하며 적용
+  const handleColorChange = (color: any) => {
+    setShadowColor(color);
+    applyShadow(color, shadowBlur, shadowOffset.x, shadowOffset.y);
+  };
+
+  const handleBlurChange = (blur: any) => {
+    setShadowBlur(blur);
+    applyShadow(shadowColor, blur, shadowOffset.x, shadowOffset.y);
+  };
+
+  // 버튼 클릭 시 offset 변경하며 적용
+  const handleShadowClick = (x: any, y: any) => {
+    setShadowOffset({ x, y });
+    applyShadow(shadowColor, shadowBlur, x, y);
+  };
+
+  useEffect(() => {
+    if (!selectedObject) {
+      setShadowColor("#000000");
+      setShadowBlur(0);
+      setShadowOffset({ x: 3, y: 3 });
+      return;
+    }
+
+    const shadow = selectedObject.shadow as fabric.Shadow | null;
+
+    if (shadow) {
+      setShadowColor(shadow.color ?? "#000000");
+      setShadowBlur(shadow.blur ?? 0);
+      setShadowOffset({
+        x: shadow.offsetX ?? 3,
+        y: shadow.offsetY ?? 3,
+      });
+    } else {
+      setShadowColor("#000000");
+      setShadowBlur(0);
+      setShadowOffset({ x: 3, y: 3 });
+    }
+  }, [selectedObject]);
+
   return (
     <div className="h-screen bg-[#1a1a1a] flex flex-col">
       {/* 상단 툴바 */}
@@ -659,63 +740,53 @@ export default function Editor() {
                 </div>
 
                 {/* Shadow */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[13px] text-white cursor-pointer">
-                  <div
-                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
-                    style={{ boxShadow: "-4px -4px 3px #000000" }}
-                  >
-                    shadow 1
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-gray-300">Shadow</h3>
+
+                  {/* 색상 & Blur 선택 */}
+                  <div className="flex items-center gap-4 text-white text-sm">
+                    <input
+                      type="color"
+                      value={shadowColor}
+                      onChange={(e) => handleColorChange(e.target.value)}
+                      className="ml-1 align-middle"
+                    />
+                    <label className="flex items-center gap-2">
+                      Blur:
+                      <input
+                        type="range"
+                        min={0}
+                        max={20}
+                        step={1}
+                        value={shadowBlur}
+                        onChange={(e) =>
+                          handleBlurChange(parseInt(e.target.value))
+                        }
+                      />
+                      <span className="w-6 text-right">{shadowBlur}px</span>
+                    </label>
                   </div>
-                  <div
-                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
-                    style={{ boxShadow: "0 -4px 3px #000000" }}
-                  >
-                    shadow 2
-                  </div>
-                  <div
-                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
-                    style={{ boxShadow: "4px -4px 3px #000000" }}
-                  >
-                    shadow 3
-                  </div>
-                  <div
-                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
-                    style={{ boxShadow: "-4px 0 3px #000000" }}
-                  >
-                    shadow 4
-                  </div>
-                  <div
-                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
-                    style={{ boxShadow: "0 0 3px 3px #000000" }}
-                  >
-                    shadow 5
-                  </div>
-                  <div
-                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
-                    style={{ boxShadow: "4px 0 3px #000000" }}
-                  >
-                    shadow 6
-                  </div>
-                  <div
-                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
-                    style={{ boxShadow: "-4px 4px 3px #000000" }}
-                  >
-                    shadow 7
-                  </div>
-                  <div
-                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
-                    style={{ boxShadow: "0 4px 3px #000000" }}
-                  >
-                    shadow 8
-                  </div>
-                  <div
-                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
-                    style={{ boxShadow: "4px 4px 3px #000000" }}
-                  >
-                    shadow 9
+
+                  {/* 그림자 offset 버튼들 */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[13px] text-white cursor-pointer">
+                    {shadows.map(({ name, x, y }, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => handleShadowClick(x, y)}
+                        className={`flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 ${
+                          shadowOffset.x === x && shadowOffset.y === y
+                            ? "bg-[#259478]"
+                            : "bg-[#303030] hover:bg-[#252525]"
+                        }`}
+                        style={{
+                          boxShadow: `${x}px ${y}px ${shadowBlur}px ${shadowColor}`,
+                        }}
+                      >
+                        {name}
+                      </div>
+                    ))}
                   </div>
                 </div>
-
                 {/* Transform */}
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium text-gray-300">
