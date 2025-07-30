@@ -221,38 +221,34 @@ export default function Editor() {
                   );
                   // console.log("최종출력코드", code);
                   setExportFile(`
-                  <!DOCTYPE html>
-                  <html lang="en">
+                    <!DOCTYPE html>
+                    <html lang="en">
                     <head>
                       <meta charset="UTF-8" />
                       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                       <title>Exported Tree</title>
                       <style>
                         body {
+                          margin: 0;
+                          height: 100vh;
+                          background-color: gray;
+                          overflow-x: auto;
                           position: relative;
                           width: 100%;
-                          height: 100vh;
-                          margin: 0;
+                        }
+
+                        #main {
+                          position: relative;
                           background-color: white;
-                          overflow-x: hidden; 
+                          height: 100vh;
+                          width: ${screenWidth}px;
+                          max-width: 100vw;
+                          margin: 0 auto; 
                         }
                       </style>
                     </head>
                     <body>
-                      <div 
-                        id="main"
-                        style="
-                          position: absolute;
-                          top: 50%;
-                          left: 50%;
-                          transform: translate(-50%, -50%);
-                          // background-color: white;
-                          height: 100vh;
-                          width: ${screenWidth}px;
-                          max-width: 100vw; 
-                          // overflow: auto;
-                        "
-                      >
+                      <div id="main">
                         ${code}
                       </div>
 
