@@ -231,8 +231,8 @@ export default function Editor() {
                         body {
                           margin: 0;
                           height: 100vh;
-                          background-color: gray;
-                          overflow-x: auto;
+                          background-color: white;
+                          overflow-x: hidden;
                           position: relative;
                           width: 100%;
                         }
@@ -658,6 +658,64 @@ export default function Editor() {
                   />
                 </div>
 
+                {/* Shadow */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[13px] text-white cursor-pointer">
+                  <div
+                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
+                    style={{ boxShadow: "-4px -4px 3px #000000" }}
+                  >
+                    shadow 1
+                  </div>
+                  <div
+                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
+                    style={{ boxShadow: "0 -4px 3px #000000" }}
+                  >
+                    shadow 2
+                  </div>
+                  <div
+                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
+                    style={{ boxShadow: "4px -4px 3px #000000" }}
+                  >
+                    shadow 3
+                  </div>
+                  <div
+                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
+                    style={{ boxShadow: "-4px 0 3px #000000" }}
+                  >
+                    shadow 4
+                  </div>
+                  <div
+                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
+                    style={{ boxShadow: "0 0 3px 3px #000000" }}
+                  >
+                    shadow 5
+                  </div>
+                  <div
+                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
+                    style={{ boxShadow: "4px 0 3px #000000" }}
+                  >
+                    shadow 6
+                  </div>
+                  <div
+                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
+                    style={{ boxShadow: "-4px 4px 3px #000000" }}
+                  >
+                    shadow 7
+                  </div>
+                  <div
+                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
+                    style={{ boxShadow: "0 4px 3px #000000" }}
+                  >
+                    shadow 8
+                  </div>
+                  <div
+                    className="flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-[#303030] hover:bg-[#252525]"
+                    style={{ boxShadow: "4px 4px 3px #000000" }}
+                  >
+                    shadow 9
+                  </div>
+                </div>
+
                 {/* Transform */}
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium text-gray-300">
@@ -799,7 +857,11 @@ export default function Editor() {
                     <button
                       onClick={() => applyAnimation("fadeIn")}
                       className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-gray-400 hover:bg-gray-500
-                        ${selectedObject?.animation === "fadeIn" ? "ring-2 ring-white scale-105 shadow-lg" : ""}`}
+                        ${
+                          selectedObject?.animation === "fadeIn"
+                            ? "ring-2 ring-white scale-105 shadow-lg"
+                            : ""
+                        }`}
                     >
                       <Eye size={10} />
                       Fade In
@@ -808,7 +870,11 @@ export default function Editor() {
                     <button
                       onClick={() => applyAnimation("fadeOut")}
                       className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-orange-800 hover:bg-orange-700
-                        ${selectedObject?.animation === "fadeOut" ? "ring-2 ring-white scale-105 shadow-lg" : ""}`}
+                        ${
+                          selectedObject?.animation === "fadeOut"
+                            ? "ring-2 ring-white scale-105 shadow-lg"
+                            : ""
+                        }`}
                     >
                       <EyeOff size={10} />
                       Fade Out

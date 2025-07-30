@@ -103,6 +103,7 @@ const generateUnlinkedNodeCode = (
 };
 
 // 계층 코드 관리
+// 계층 코드 관리
 const generateTreeNodeCode = (
   node: TreeNode,
   indent: number,
@@ -115,10 +116,7 @@ const generateTreeNodeCode = (
   const indentSpace = " ".repeat(indent * 2);
   const id = node.id;
 
-  // 원래 값을 any로 접근
   const object = node.object as any;
-
-  // 스케일 적용 (width/left 는 scaleX, height/top 은 scaleY)
 
   const width = (object.width ?? 0) * scaleX;
   const height = (object.height ?? 0) * scaleY;
@@ -127,10 +125,13 @@ const generateTreeNodeCode = (
   const left = (object.left ?? 0) * scaleX;
   const top = (object.top ?? 0) * scaleY;
 
+  const animation = object.animation || "";
+  const animationAttr = animation ? ` data-animation="${animation}"` : "";
+
   const isRoot = indent === 0;
 
   let style = "";
-  
+
   if (isRoot) {
     style = `
       position: absolute;
@@ -142,65 +143,38 @@ const generateTreeNodeCode = (
       margin-top: ${top}px;
     `;
   } else {
-    // 부모 위치 차이 계산 시에도 scaleX, scaleY 반영
     const childrenLeft = left - parentLeft;
     const childrenTop = top - parentTop;
 
     if (object.shapeType === "image") {
-      const imageWidth = (imageData[node.id][0] || 0) * scaleX;
-      const imageHeight = (imageData[node.id][1] || 0) * scaleY;
+      const imageWidth = (imageData[node.id]?.[0] || 0) * scaleX;
+      const imageHeight = (imageData[node.id]?.[1] || 0) * scaleY;
       style = `
-      position: absolute;
-      width: ${imageWidth}px;
-      height: ${imageHeight}px;
-      margin-left: ${childrenLeft}px;
-      margin-top: ${childrenTop}px;
-    `;
+        position: absolute;
+        width: ${imageWidth}px;
+        height: ${imageHeight}px;
+        margin-left: ${childrenLeft}px;
+        margin-top: ${childrenTop}px;
+      `;
     } else {
       style = `
-      position: absolute;
-      width: ${width}px;
-      height: ${height}px;
-      background-color: ${fill};
-      border: 1px solid ${stroke};
-      margin-left: ${childrenLeft}px;
-      margin-top: ${childrenTop}px;
-    `;
+        position: absolute;
+        width: ${width}px;
+        height: ${height}px;
+        background-color: ${fill};
+        border: 1px solid ${stroke};
+        margin-left: ${childrenLeft}px;
+        margin-top: ${childrenTop}px;
+      `;
     }
   }
 
-  // 이미지의 경우
-  if (object.shapeType === "image") {
-    style = style.trim().replace(/\s+/g, " ");
-    const divStart = `${indentSpace}<img id="${id}" src="${object.src}" style="${style}"/>`;
-
-    let childrenCode = "";
-    if (node.children && node.children.length > 0) {
-      childrenCode = node.children
-        .map((child) =>
-          generateTreeNodeCode(
-            child,
-            indent + 1,
-            left,
-            top,
-            scaleX,
-            scaleY,
-            imageData
-          )
-        )
-        .join("\n");
-    }
-
-    return [divStart, childrenCode].join("\n");
-  }
-
-  //이미지가 아닐때
   style = style.trim().replace(/\s+/g, " ");
-  const divStart = `${indentSpace}<div id="${id}" style="${style}">`;
 
-  let childrenCode = "";
-  if (node.children && node.children.length > 0) {
-    childrenCode = node.children
+  // 이미지 태그 처리
+  if (object.shapeType === "image") {
+    const divStart = `${indentSpace}<img id="${id}" src="${object.src}" style="${style}"${animationAttr}/>`;
+    const childrenCode = (node.children || [])
       .map((child) =>
         generateTreeNodeCode(
           child,
@@ -213,8 +187,25 @@ const generateTreeNodeCode = (
         )
       )
       .join("\n");
+    return [divStart, childrenCode].join("\n");
   }
 
+  // div 태그 처리
+  const divStart = `${indentSpace}<div id="${id}" style="${style}"${animationAttr}>`;
+  const childrenCode = (node.children || [])
+    .map((child) =>
+      generateTreeNodeCode(
+        child,
+        indent + 1,
+        left,
+        top,
+        scaleX,
+        scaleY,
+        imageData
+      )
+    )
+    .join("\n");
   const divEnd = `${indentSpace}</div>`;
+
   return [divStart, childrenCode, divEnd].join("\n");
 };
