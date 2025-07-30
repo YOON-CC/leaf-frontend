@@ -234,23 +234,32 @@ export default function Editor() {
                           height: 100vh;
                           margin: 0;
                           background-color: gray;
+                          overflow: hidden; 
                         }
+                            #main::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
                       </style>
                     </head>
                     <body>
-                      <div 
-                        id="main"
-                        style="
-                          position: absolute;
-                          top: 50%;
-                          left: 50%;
-                          transform: translate(-50%, -50%);
-                          background-color: white;
-                          height: 100vh;
-                          width: ${screenWidth}px;
-                          overflow: auto;
-                        "
-                      >
+<div 
+  id="main"
+  style="
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    height: 100vh;
+    width: ${screenWidth}px;
+    max-width: 100vw;
+    overflow: auto;
+
+    /* 스크롤은 되지만 스크롤바 숨김 */
+    scrollbar-width: none;           /* Firefox */
+    -ms-overflow-style: none;        /* IE, Edge */
+  "
+>
                         ${code}
                       </div>
 
