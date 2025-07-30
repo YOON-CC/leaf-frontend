@@ -39,6 +39,8 @@ export function createShape(type: string): fabric.Object | null {
         fill: "#ef4444",
         left: 100,
         top: 100,
+        stroke: "#000000",
+        strokeWidth: 0,
       });
       rect.set("customId", uuidv4());
       rect.set("shapeType", "rectangle");
@@ -70,9 +72,7 @@ export function createShape(type: string): fabric.Object | null {
       return text;
     }
 
-
     default:
       return null;
   }
 }
-

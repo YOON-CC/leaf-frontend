@@ -622,9 +622,6 @@ export default function Editor() {
                     </span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <button className="p-1.5 text-gray-400 hover:text-white hover:bg-[#252525] rounded transition-colors">
-                      <Copy size={14} />
-                    </button>
                     <button
                       onClick={() =>
                         deleteSelected(
@@ -674,7 +671,7 @@ export default function Editor() {
                   <div className="flex items-center space-x-2">
                     <input
                       type="color"
-                      value={objectProperties.stroke}
+                      value={objectProperties.stroke || "#000000"}
                       onChange={(e) =>
                         handlePropertyChange("stroke", e.target.value)
                       }

@@ -89,12 +89,20 @@ const generateUnlinkedNodeCode = (
   const fill = object.fill || "transparent";
   const stroke = object.stroke || "none";
 
+  // border 관련 처리
+  const borderWidth = object.strokeWidth;
+  console.log(object);
+  const borderStyle =
+    borderWidth === 0
+      ? "border: none;"
+      : `border: ${borderWidth}px solid ${stroke};`;
+
   const style = `
     position: absolute;
     width: ${width}px;
     height: ${height}px;
     background-color: ${fill};
-    border: 1px solid ${stroke};
+    ${borderStyle}
     margin-left: ${left}px;
     margin-top: ${top}px;
     ${boxShadowStyle}
@@ -122,7 +130,8 @@ const generateTreeNodeCode = (
   const width = (object.width ?? 0) * scaleX;
   const height = (object.height ?? 0) * scaleY;
   const fill = object.fill || "transparent";
-  const stroke = object.stroke || "none";
+  const stroke = object.stroke || "#000000";
+  const borderWidth = object.strokeWidth;
   const left = (object.left ?? 0) * scaleX;
   const top = (object.top ?? 0) * scaleY;
 
@@ -130,8 +139,6 @@ const generateTreeNodeCode = (
   const animationAttr = animation ? ` data-animation="${animation}"` : "";
 
   const isRoot = indent === 0;
-
-  let style = "";
 
   // ✅ 그림자 처리
   const shadow = object.shadow;
@@ -143,6 +150,14 @@ const generateTreeNodeCode = (
     const shadowColor = shadow.color || "rgba(0,0,0,0.5)";
     boxShadow = `box-shadow: ${shadowOffsetX}px ${shadowOffsetY}px ${shadowBlur}px ${shadowColor};`;
   }
+
+  // ✅ border 처리
+  const borderStyle =
+    borderWidth === 0
+      ? "border: none;"
+      : `border: ${borderWidth}px solid ${stroke};`;
+
+  let style = "";
 
   if (isRoot) {
     style = `
@@ -181,7 +196,7 @@ const generateTreeNodeCode = (
         width: ${width}px;
         height: ${height}px;
         background-color: ${fill};
-        border: 1px solid ${stroke};
+        ${borderStyle}
         margin-left: ${childrenLeft}px;
         margin-top: ${childrenTop}px;
         ${boxShadow}
