@@ -149,11 +149,8 @@ const generateTreeNodeCode = (
       position: absolute;
       width: ${width}px;
       height: ${height}px;
-      background-color: ${fill};
-      border: 1px solid ${stroke};
       margin-left: ${left}px;
       margin-top: ${top}px;
-      ${boxShadow}
     `;
   } else {
     const childrenLeft = left - parentLeft;
@@ -169,6 +166,14 @@ const generateTreeNodeCode = (
         margin-left: ${childrenLeft}px;
         margin-top: ${childrenTop}px;
         ${boxShadow}
+      `;
+    } else if (object.shapeType === "layout") {
+      style = `
+        position: absolute;
+        width: ${width}px;
+        height: ${height}px;
+        margin-left: ${childrenLeft}px;
+        margin-top: ${childrenTop}px;
       `;
     } else {
       style = `
