@@ -2,9 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
 import {
-  Circle,
   Square,
-  Triangle,
   Type,
   Palette,
   Move,
@@ -12,7 +10,6 @@ import {
   Save,
   Download,
   Layers,
-  Copy,
   Image,
   ArrowUp,
   ArrowDown,
@@ -59,6 +56,8 @@ export default function Editor() {
     strokeWidth: 0,
     stroke: "#000000",
     opacity: 1,
+    rx: 0,
+    ry: 0,
     angle: 0,
     scaleX: 1,
     scaleY: 1,
@@ -505,7 +504,7 @@ export default function Editor() {
                   Basic Shapes
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
-                  <button
+                  {/* <button
                     onClick={() => addShape("circle")}
                     className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
                   >
@@ -514,7 +513,7 @@ export default function Editor() {
                       className="text-blue-400 group-hover:text-blue-300"
                     />
                     <span className="text-xs text-gray-300">Circle</span>
-                  </button>
+                  </button> */}
 
                   <button
                     onClick={() => addShape("rectangle")}
@@ -527,7 +526,7 @@ export default function Editor() {
                     <span className="text-xs text-gray-300">Rectangle</span>
                   </button>
 
-                  <button
+                  {/* <button
                     onClick={() => addShape("triangle")}
                     className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
                   >
@@ -536,7 +535,7 @@ export default function Editor() {
                       className="text-green-400 group-hover:text-green-300"
                     />
                     <span className="text-xs text-gray-300">Triangle</span>
-                  </button>
+                  </button> */}
 
                   <button
                     onClick={() => addShape("text")}
@@ -708,6 +707,31 @@ export default function Editor() {
                       className="w-full h-2 bg-[#303030] rounded-lg appearance-none cursor-pointer slider"
                     />
                   </div>
+                </div>
+
+                {/* Rounded */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-300">
+                      Rounded
+                    </span>
+                    <span className="text-sm text-gray-300">
+                      {selectedObject?.rx ?? 0}px
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
+                    value={selectedObject?.rx ?? 0}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      handlePropertyChange("rx", value);
+                      handlePropertyChange("ry", value); // 둥글기 대칭 적용
+                    }}
+                    className="w-full h-2 bg-[#303030] rounded-lg appearance-none cursor-pointer slider"
+                  />
                 </div>
 
                 {/* Opacity */}

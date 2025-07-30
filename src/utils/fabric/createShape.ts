@@ -40,7 +40,7 @@ export function createShape(type: string): fabric.Object | null {
         left: 100,
         top: 100,
         stroke: "#000000",
-        strokeWidth: 0,
+        rx: 0,
       });
       rect.set("customId", uuidv4());
       rect.set("shapeType", "rectangle");

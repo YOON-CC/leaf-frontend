@@ -47,7 +47,7 @@ const generateUnlinkedNodeCode = (
   const animationAttr = `data-animation="${animation}"`;
   const indentSpace = " ".repeat(indent * 2);
   const id = node.id;
-
+  console.log(object);
   // 그림자 CSS 문자열 생성
   let boxShadowStyle = "";
   if (object.shadow) {
