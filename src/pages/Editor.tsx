@@ -23,6 +23,8 @@ import {
   AlignLeft,
   AlignCenter,
   AlignRight,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { createShape } from "../utils/fabric/createShape";
 import { addChildToTree } from "../utils/tree/treeUtils";
@@ -263,11 +265,20 @@ export default function Editor() {
                               if (!animation || el.dataset.animated === 'true') return;
 
                               el.dataset.animated = 'true';
-                              el.style.transition = 'all 0.8s ease';
+                              
+                              // fadeIn, fadeOut의 경우 2초, 나머지는 0.8초
+                              if (animation === 'fadeIn' || animation === 'fadeOut') {
+                                el.style.transition = 'opacity 2s ease';
+                              } else {
+                                el.style.transition = 'all 0.8s ease';
+                              }
 
                               switch (animation) {
                                 case 'fadeIn':
                                   el.style.opacity = '1';
+                                  break;
+                                case 'fadeOut':
+                                  el.style.opacity = '0';
                                   break;
                                 case 'up':
                                 case 'down':
@@ -293,7 +304,13 @@ export default function Editor() {
 
                           document.querySelectorAll('[data-animation]').forEach(el => {
                             const animation = el.getAttribute('data-animation');
-                            el.style.opacity = '0';
+                            
+                            // fadeOut의 경우 초기값을 1로, fadeIn의 경우 0으로 설정
+                            if (animation === 'fadeOut') {
+                              el.style.opacity = '1';
+                            } else {
+                              el.style.opacity = '0';
+                            }
 
                             switch (animation) {
                               case 'up':
@@ -315,13 +332,20 @@ export default function Editor() {
                                 el.style.transform = 'scale(1.4)';
                                 break;
                               case 'fadeIn':
-                                // no transform needed
+                                // fadeIn의 경우 초기 opacity는 0으로 유지
+                                // (이미 위에서 설정됨)
+                                break;
+                              case 'fadeOut':
+                                // fadeOut의 경우 초기 opacity는 1로 유지
+                                // (이미 위에서 설정됨)
                                 break;
                               case 'sticky':
-                                
                                 return;
                             }
-                                el.style.opacity = '1';
+                            // fadeIn, fadeOut이 아닌 경우에만 opacity를 1로 설정
+                            if (animation !== 'fadeIn' && animation !== 'fadeOut') {
+                              el.style.opacity = '1';
+                            }
 
                             observer.observe(el);
                           });
@@ -696,107 +720,111 @@ export default function Editor() {
                   <h3 className="text-sm font-medium text-gray-300">
                     Animation
                   </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px]">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
                     <button
                       onClick={() => applyAnimation("up")}
-                      className={`flex justify-evenly items-center gap-1 px-2 h-[55px] rounded-lg font-medium transition transform hover:scale-105 bg-green-600 hover:bg-green-500
+                      className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-green-600 hover:bg-green-500
                         ${
                           selectedObject?.animation === "up"
                             ? "ring-2 ring-white scale-105 shadow-lg"
                             : ""
                         }`}
                     >
-                      <ArrowUp size={12} />
+                      <ArrowUp size={10} />
                       Up
                     </button>
                     <button
                       onClick={() => applyAnimation("down")}
-                      className={`flex justify-evenly items-center gap-1 px-2 h-[55px] rounded-lg font-medium transition transform hover:scale-105 bg-blue-600 hover:bg-blue-500
+                      className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-blue-600 hover:bg-blue-500
                         ${
                           selectedObject?.animation === "down"
                             ? "ring-2 ring-white scale-105 shadow-lg"
                             : ""
                         }`}
                     >
-                      <ArrowDown size={12} />
+                      <ArrowDown size={10} />
                       Down
                     </button>
 
                     <button
                       onClick={() => applyAnimation("right")}
-                      className={`flex justify-evenly items-center gap-1 px-2 h-[55px] rounded-lg font-medium transition transform hover:scale-105 bg-orange-600 hover:bg-orange-500
+                      className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-orange-600 hover:bg-orange-500
                         ${
                           selectedObject?.animation === "right"
                             ? "ring-2 ring-white scale-105 shadow-lg"
                             : ""
                         }`}
                     >
-                      <ArrowRight size={12} />
+                      <ArrowRight size={10} />
                       Right
                     </button>
 
                     <button
                       onClick={() => applyAnimation("left")}
-                      className={`flex justify-evenly items-center gap-1 px-2 h-[55px] rounded-lg font-medium transition transform hover:scale-105 bg-yellow-600 hover:bg-yellow-500
+                      className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-yellow-600 hover:bg-yellow-500
                         ${
                           selectedObject?.animation === "left"
                             ? "ring-2 ring-white scale-105 shadow-lg"
                             : ""
                         }`}
                     >
-                      <ArrowLeft size={12} />
+                      <ArrowLeft size={10} />
                       Left
                     </button>
 
                     <button
                       onClick={() => applyAnimation("scaleUp")}
-                      className={`flex justify-evenly items-center gap-1 px-2 h-[55px] rounded-lg font-medium transition transform hover:scale-105 bg-purple-600 hover:bg-purple-500
+                      className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-purple-600 hover:bg-purple-500
                         ${
                           selectedObject?.animation === "scaleUp"
                             ? "ring-2 ring-white scale-105 shadow-lg"
                             : ""
                         }`}
                     >
-                      <ZoomIn size={12} />
+                      <ZoomIn size={10} />
                       Scale Up
                     </button>
 
                     <button
                       onClick={() => applyAnimation("scaleDown")}
-                      className={`flex justify-evenly items-center gap-1 px-2 h-[55px] rounded-lg font-medium transition transform hover:scale-105 bg-pink-600 hover:bg-pink-500
+                      className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-pink-600 hover:bg-pink-500
                         ${
                           selectedObject?.animation === "scaleDown"
                             ? "ring-2 ring-white scale-105 shadow-lg"
                             : ""
                         }`}
                     >
-                      <ZoomOut size={12} />
+                      <ZoomOut size={10} />
                       Scale Down
                     </button>
 
                     <button
                       onClick={() => applyAnimation("fadeIn")}
-                      className={`flex justify-evenly items-center gap-1 px-2 h-[55px] rounded-lg font-medium transition transform hover:scale-105 bg-gray-400 hover:bg-gray-500
-                        ${
-                          selectedObject?.animation === "fadeIn"
-                            ? "ring-2 ring-white scale-105 shadow-lg"
-                            : ""
-                        }`}
+                      className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-gray-400 hover:bg-gray-500
+                        ${selectedObject?.animation === "fadeIn" ? "ring-2 ring-white scale-105 shadow-lg" : ""}`}
                     >
-                      <ZoomOut size={12} />
+                      <Eye size={10} />
                       Fade In
                     </button>
 
                     <button
+                      onClick={() => applyAnimation("fadeOut")}
+                      className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-orange-800 hover:bg-orange-700
+                        ${selectedObject?.animation === "fadeOut" ? "ring-2 ring-white scale-105 shadow-lg" : ""}`}
+                    >
+                      <EyeOff size={10} />
+                      Fade Out
+                    </button>
+                    <button
                       onClick={() => applyAnimation("sticky")}
-                      className={`flex justify-evenly items-center gap-1 px-2 h-[55px] rounded-lg font-medium transition transform hover:scale-105 bg-gray-600 hover:bg-gray-500
+                      className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-gray-600 hover:bg-gray-500
                         ${
                           selectedObject?.animation === "sticky"
                             ? "ring-2 ring-white scale-105 shadow-lg"
                             : ""
                         }`}
                     >
-                      <Move size={12} />
+                      <Move size={10} />
                       Sticky
                     </button>
                   </div>
