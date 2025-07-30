@@ -97,6 +97,12 @@ const generateUnlinkedNodeCode = (
       ? "border: none;"
       : `border: ${borderWidth}px solid ${stroke};`;
 
+  // rounded 관련 처리
+  const rx = object.rx || 0;
+  const ry = object.ry || 0;
+  const borderRadiusStyle =
+    rx || ry ? `border-radius: ${Math.max(rx, ry)}px;` : "";
+
   const style = `
     position: absolute;
     width: ${width}px;
@@ -106,6 +112,7 @@ const generateUnlinkedNodeCode = (
     margin-left: ${left}px;
     margin-top: ${top}px;
     ${boxShadowStyle}
+    ${borderRadiusStyle}
   `
     .trim()
     .replace(/\s+/g, " ");
@@ -157,6 +164,12 @@ const generateTreeNodeCode = (
       ? "border: none;"
       : `border: ${borderWidth}px solid ${stroke};`;
 
+  // ✅ rounded 관련 처리
+  const rx = object.rx || 0;
+  const ry = object.ry || 0;
+  const borderRadiusStyle =
+    rx || ry ? `border-radius: ${Math.max(rx, ry)}px;` : "";
+
   let style = "";
 
   if (isRoot) {
@@ -200,6 +213,7 @@ const generateTreeNodeCode = (
         margin-left: ${childrenLeft}px;
         margin-top: ${childrenTop}px;
         ${boxShadow}
+        ${borderRadiusStyle}
       `;
     }
   }
