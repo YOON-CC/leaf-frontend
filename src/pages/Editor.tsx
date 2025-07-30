@@ -234,7 +234,7 @@ export default function Editor() {
                           height: 100vh;
                           margin: 0;
                           background-color: white;
-                          overflow: auto; 
+                          overflow-x: hidden; 
                         }
                       </style>
                     </head>
@@ -249,7 +249,7 @@ export default function Editor() {
                           // background-color: white;
                           height: 100vh;
                           width: ${screenWidth}px;
-                          max-width: 100vw; /* 100% 넘어가면 확대 제한 */
+                          max-width: 100vw; 
                           // overflow: auto;
                         "
                       >
