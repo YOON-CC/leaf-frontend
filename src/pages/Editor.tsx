@@ -318,44 +318,10 @@ export default function Editor() {
                                 // no transform needed
                                 break;
                               case 'sticky':
-                                el.style.opacity = '1';
-                                el.style.position = 'relative';
-
-                                const marginTopInt = parseInt(el.style.marginTop.replace('px', ''), 10);
-                                const main = document.getElementById('main');
-                                let trigger = false;
-
-                                if (main) {
-                                  let isFixed = false;
-                                  let isStickyStarted = false;
-
-                                  main.addEventListener('scroll', () => {
-                                    const scrollTop = main.scrollTop;
-                                    const rect = el.getBoundingClientRect();
-                                    const windowHeight = window.innerHeight;
-
-                                    if (!isStickyStarted && (rect.top + rect.height / 2) <= windowHeight / 2) {
-                                      if ((marginTopInt + rect.height / 2) < windowHeight / 2) {
-                                        trigger = true;
-                                      }
-
-                                      el.style.position = 'sticky';
-                                      el.style.top = trigger
-                                        ? \`\${marginTopInt}px\`
-                                        : \`\${windowHeight / 2 - rect.height / 2}px\`;
-
-                                      isStickyStarted = true;
-                                    }
-
-                                    if (isStickyStarted && scrollTop > marginTopInt + 2000 && !isFixed) {
-                                      el.style.position = 'relative';
-                                      el.style.marginTop = \`\${scrollTop}px\`;
-                                      isFixed = true;
-                                    }
-                                  });
-                                }
+                                
                                 return;
                             }
+                                el.style.opacity = '1';
 
                             observer.observe(el);
                           });
