@@ -374,7 +374,22 @@ export default function Editor() {
                                   el.style.opacity = '1';
                                   break;
                                 case 'sticky':
-                                  // handled separately
+                                  // sticky 동작 처리
+                                  const stickyTop = el.getBoundingClientRect().top + window.scrollY; // 원래 Y위치
+                                  const fixedTop = el.getBoundingClientRect().top; // 화면 내 Y위치
+                                  const fixedLeft = el.getBoundingClientRect().left; // 화면 내 X위치
+                                  const originalWidth = el.offsetWidth; // 고정 시 너비 유지
+                                  
+                                  window.addEventListener('scroll', () => {
+                                    // if (window.scrollY >= stickyTop) {
+                                    //   el.style.position = 'fixed';
+                                    //   el.style.top = fixedTop + 'px';
+                                    //   el.style.zIndex = '9999';
+                                    // } else {
+                                      el.style.top = window.scrollY + 'px';
+                                      console.log('현재 스크롤 Y:', window.scrollY);
+                                    // }
+                                  });
                                   break;
                               }
                             });
@@ -418,7 +433,7 @@ export default function Editor() {
                                 // (이미 위에서 설정됨)
                                 break;
                               case 'sticky':
-                                return;
+                                break;
                             }
                             // fadeIn, fadeOut이 아닌 경우에만 opacity를 1로 설정
                             if (animation !== 'fadeIn' && animation !== 'fadeOut') {
