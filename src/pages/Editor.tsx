@@ -374,6 +374,10 @@ export default function Editor() {
                                   el.style.opacity = '1';
                                   break;
                                 case 'sticky':
+                                  el.style.position = 'fixed';
+                                  el.style.top = 0;
+                                  break;
+                                case 'stickyGently':
                                   // sticky 동작 처리
                                   const stickyTop = el.getBoundingClientRect().top + window.scrollY; // 원래 Y위치
                                   const fixedTop = el.getBoundingClientRect().top; // 화면 내 Y위치
@@ -433,6 +437,8 @@ export default function Editor() {
                                 // (이미 위에서 설정됨)
                                 break;
                               case 'sticky':
+                                break;
+                              case 'stickyGently':
                                 break;
                             }
                             // fadeIn, fadeOut이 아닌 경우에만 opacity를 1로 설정
@@ -883,7 +889,7 @@ export default function Editor() {
                   <h3 className="text-sm font-medium text-gray-300">
                     Animation
                   </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 text-[11px]">
                     <button
                       onClick={() => applyAnimation("up")}
                       className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-green-600 hover:bg-green-500
@@ -988,7 +994,7 @@ export default function Editor() {
                     </button>
                     <button
                       onClick={() => applyAnimation("sticky")}
-                      className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-gray-600 hover:bg-gray-500
+                      className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-gray-800 hover:bg-gray-700
                         ${
                           selectedObject?.animation === "sticky"
                             ? "ring-2 ring-white scale-105 shadow-lg"
@@ -996,7 +1002,19 @@ export default function Editor() {
                         }`}
                     >
                       <Move size={10} />
-                      Sticky
+                      sticky
+                    </button>
+                    <button
+                      onClick={() => applyAnimation("stickyGently")}
+                      className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-gray-600 hover:bg-gray-500
+                        ${
+                          selectedObject?.animation === "stickyGently"
+                            ? "ring-2 ring-white scale-105 shadow-lg"
+                            : ""
+                        }`}
+                    >
+                      <Move size={10} />
+                      sticky gently
                     </button>
                   </div>
                 </div>
