@@ -81,6 +81,28 @@ const generateUnlinkedNodeCode = (
     return `${indentSpace}<img id="${id}" src="${object.src}" style="${style}" ${animationAttr}/>`;
   }
 
+  if (object.shapeType === "text") {
+    const left = (object.left || 0) * scaleX;
+    const top = (object.top || 0) * scaleY;
+    const fontSize = (object.fontSize || 16) * ((scaleX + scaleY) / 2);
+    const color = object.fill || "#000000";
+
+    const style = `
+    position: absolute;
+    margin-left: ${left}px;
+    margin-top: ${top}px;
+    color: ${color};
+    font-size: ${fontSize}px;
+    white-space: nowrap;
+  `
+      .trim()
+      .replace(/\s+/g, " ");
+
+    const textContent = object.text || "";
+
+    return `${indentSpace}<div id="${id}" style="${style}" ${animationAttr}>${textContent}</div>`;
+  }
+
   // 일반 도형일 경우
   const width = (object.width || 0) * scaleX;
   const height = (object.height || 0) * scaleY;
