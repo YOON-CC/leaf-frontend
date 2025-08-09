@@ -62,6 +62,7 @@ export default function Editor() {
     scaleX: 1,
     scaleY: 1,
   });
+  const [canvasBackgroundColor, setCanvasBackgroundColor] = useState("#ffffff");
 
   // 충돌 중인지 저장하는 ref (렌더링과 무관하게 상태 저장용)
   const isIntersectingRef = useRef(false);
@@ -311,7 +312,7 @@ export default function Editor() {
                         body {
                           margin: 0;
                           height: 100vh;
-                          background-color: white;
+                          background-color: ${canvasBackgroundColor};
                           overflow-x: hidden;
                           position: relative;
                           width: 100%;
@@ -319,7 +320,7 @@ export default function Editor() {
 
                         #main {
                           position: relative;
-                          background-color: white;
+                          background-color: ${canvasBackgroundColor};
                           height: 100vh;
                           width: ${screenWidth}px;
                           max-width: 100vw;
@@ -644,6 +645,15 @@ export default function Editor() {
         </div>
 
         {/* 중앙 캔버스 영역 */}
+        <div className="p-4">
+          <input
+            id="bgcolor"
+            type="color"
+            value={canvasBackgroundColor}
+            onChange={(e) => setCanvasBackgroundColor(e.target.value)}
+            className="w-12 h-8 cursor-pointer"
+          />
+        </div>
         <div className="flex-1 flex items-center justify-center bg-[#1a1a1a] p-8 ">
           <div className="bg-white shadow-xl max-h-[calc(100vh-150px)] overflow-auto">
             <canvas
@@ -651,6 +661,9 @@ export default function Editor() {
               style={{ boxShadow: "0 0 0 1px rgba(0,0,0,0.1)" }}
             />
           </div>
+        </div>
+        <div className="p-4">
+          <div className="w-12 h-8"></div>
         </div>
 
         {/* 오른쪽 속성 패널 */}
