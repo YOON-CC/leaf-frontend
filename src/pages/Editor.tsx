@@ -290,7 +290,7 @@ export default function Editor() {
                   if (!fabricCanvas.current) return;
                   const canvasWidth = fabricCanvas.current.getWidth();
                   // const canvasHeight = fabricCanvas.current.getHeight();
-                  const canvasHeight = 800;
+                  const canvasHeight = 670;
 
                   const screenWidth = window.screen.width;
                   const screenHeight = window.screen.height;
