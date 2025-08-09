@@ -263,7 +263,20 @@ export default function Editor() {
               <button className="p-2 bg-[#28e0b2] text-white rounded-md hover:bg-[#259478] transition-colors">
                 <Save size={16} />
               </button>
-              <button className="p-2 bg-[#1a1a1a] text-gray-200 rounded-md hover:bg-[#252525] transition-colors">
+              <button
+                className="p-2 bg-[#1a1a1a] text-gray-200 rounded-md hover:bg-[#252525] transition-colors"
+                onClick={() =>
+                  exportCanvas({
+                    fabricCanvas,
+                    treeToCode,
+                    treeNodes,
+                    unlinkedNodes,
+                    scalingTargetValueRef,
+                    canvasBackgroundColor,
+                    setExportFile,
+                  })
+                }
+              >
                 <Download size={16} />
               </button>
             </div>
@@ -395,25 +408,33 @@ export default function Editor() {
         </div>
 
         {/* 중앙 캔버스 영역 */}
-        <div className="p-4">
-          <input
-            id="bgcolor"
-            type="color"
-            value={canvasBackgroundColor}
-            onChange={(e) => setCanvasBackgroundColor(e.target.value)}
-            className="w-12 h-8 cursor-pointer"
-          />
-        </div>
-        <div className="flex-1 flex items-center justify-center bg-[#1a1a1a] p-8 ">
-          <div className="bg-white shadow-xl max-h-[calc(100vh-150px)] overflow-auto">
-            <canvas
-              ref={canvasRef}
-              style={{ boxShadow: "0 0 0 1px rgba(0,0,0,0.1)" }}
-            />
+        <div className="flex-1 flex flex-col bg-[#1a1a1a] min-w-0">
+          {/* 캔버스 컨트롤 */}
+          <div className="p-3 sm:p-4 border-b border-[#000000] flex justify-center">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <label className="text-sm text-gray-300 hidden sm:inline">
+                Background:
+              </label>
+              <input
+                id="bgcolor"
+                type="color"
+                value={canvasBackgroundColor}
+                onChange={(e) => setCanvasBackgroundColor(e.target.value)}
+                className="w-10 h-8 sm:w-12 sm:h-10 rounded border border-gray-600 cursor-pointer"
+              />
+            </div>
           </div>
-        </div>
-        <div className="p-4">
-          <div className="w-12 h-8"></div>
+
+          {/* 캔버스 */}
+          <div className="flex-1 flex items-center justify-center bg-[#1a1a1a] p-4 sm:p-6 lg:p-8 overflow-auto">
+            <div className="bg-white shadow-2xl max-h-[calc(100vh-200px)] max-w-[calc(100vw-40px)] sm:max-w-[calc(100vw-80px)] lg:max-w-[90%] overflow-auto">
+              <canvas
+                ref={canvasRef}
+                className="max-w-full max-h-full block"
+                style={{ boxShadow: "0 0 0 1px rgba(0,0,0,0.1)" }}
+              />
+            </div>
+          </div>
         </div>
 
         {/* 오른쪽 속성 패널 */}
