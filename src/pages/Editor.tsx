@@ -31,7 +31,7 @@ import {
 import { exportCanvas } from "../utils/export/exportCanvas";
 import Header from "../components/layout/Header";
 import AnimationButtons from "../components/ui/AnnimationButtons";
-import LeftSideBar from "../components/layout/LeftSidebar";
+import LeftSideBar from "../components/layout/LeftSideBar";
 interface TreeNode {
   id: string; // customId
   object: fabric.Object;
