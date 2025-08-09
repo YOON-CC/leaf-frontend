@@ -1,21 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
-import {
-  Square,
-  Type,
-  Move,
-  Trash2,
-  Layers,
-  Image,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-} from "lucide-react";
+import { Move, Trash2, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
 import { createShape } from "../utils/fabric/createShape";
 import { addChildToTree } from "../utils/tree/treeUtils";
 
-import RenderTree from "../components/treeVisual/TreeRenderer";
 import { treeToCode } from "../utils/export/treeToCode";
 import { getCombinedTree } from "../utils/export/getCombinedTree";
 import { createImage } from "../utils/fabric/createImage";
@@ -42,6 +31,7 @@ import {
 import { exportCanvas } from "../utils/export/exportCanvas";
 import Header from "../components/layout/Header";
 import AnimationButtons from "../components/ui/AnnimationButtons";
+import LeftSideBar from "../components/layout/LeftSidebar";
 interface TreeNode {
   id: string; // customId
   object: fabric.Object;
@@ -52,7 +42,6 @@ export default function Editor() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricCanvas = useRef<fabric.Canvas | null>(null);
   const [selectedObject, setSelectedObject] = useState<any | null>(null);
-  const [activeTab, setActiveTab] = useState("shapes");
   const [objectProperties, setObjectProperties] = useState({
     fill: "#ff0000",
     strokeWidth: 0,
@@ -219,113 +208,13 @@ export default function Editor() {
 
       <div className="flex-1 flex">
         {/* 왼쪽 사이드바 */}
-        <div className="w-64 bg-[#1a1a1a] border-r border-[#000000] flex flex-col">
-          {/* 탭 네비게이션 */}
-          <div className="flex border-b border-[#000000]">
-            <button
-              onClick={() => setActiveTab("shapes")}
-              className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-                activeTab === "shapes"
-                  ? "bg-[#1a1a1a] text-white border-b-2 border-[#28e0b2]"
-                  : "text-gray-400 hover:text-white hover:bg-[#252525]"
-              }`}
-            >
-              Elements
-            </button>
-            <button
-              onClick={() => setActiveTab("layers")}
-              className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-                activeTab === "layers"
-                  ? "bg-[#1a1a1a] text-white border-b-2 border-[#28e0b2]"
-                  : "text-gray-400 hover:text-white hover:bg-[#252525]"
-              }`}
-            >
-              Layers
-            </button>
-          </div>
-
-          {/* 컨텐츠 영역 */}
-          <div className="flex-1 p-4">
-            {activeTab === "shapes" ? (
-              <div className="space-y-3">
-                {/* 레이아웃 */}
-                <h3 className="text-sm font-semibold text-gray-300 mb-3">
-                  Frame
-                </h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => addShape("layout")}
-                    className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
-                  >
-                    <Layers
-                      size={20}
-                      className="text-blue-400 group-hover:text-blue-300"
-                    />
-                    <span className="text-xs text-gray-300">Layout</span>
-                  </button>
-                </div>
-                {/* 기초 도형 */}
-                <h3 className="text-sm font-semibold text-gray-300 mb-3">
-                  Basic Shapes
-                </h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => addShape("rectangle")}
-                    className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
-                  >
-                    <Square
-                      size={20}
-                      className="text-red-400 group-hover:text-red-300"
-                    />
-                    <span className="text-xs text-gray-300">Rectangle</span>
-                  </button>
-
-                  <button
-                    onClick={() => addShape("text")}
-                    className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
-                  >
-                    <Type
-                      size={20}
-                      className="text-purple-400 group-hover:text-purple-300"
-                    />
-                    <span className="text-xs text-gray-300">Text</span>
-                  </button>
-                </div>
-                <h3 className="text-sm font-semibold text-gray-300 mb-3">
-                  Additional elements
-                </h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => createImage(fabricCanvas.current)}
-                    className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
-                  >
-                    <Image
-                      size={20}
-                      className="text-yellow-400 group-hover:text-red-300"
-                    />
-                    <span className="text-xs text-gray-300">Image</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-gray-300 mb-3">
-                  Layers
-                </h3>
-
-                <div className="text-sm">
-                  <div className="text-sm">
-                    <RenderTree
-                      tree={tree}
-                      setTree={setTree}
-                      fabricCanvas={fabricCanvas.current}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        <LeftSideBar
+          fabricCanvas={fabricCanvas}
+          addShape={addShape}
+          createImage={createImage}
+          tree={tree}
+          setTree={setTree}
+        />
 
         {/* 중앙 캔버스 영역 */}
         <div className="flex-1 flex flex-col bg-[#1a1a1a] min-w-0">

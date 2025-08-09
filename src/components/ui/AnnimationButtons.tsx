@@ -96,20 +96,20 @@ export default function AnimationButtons({
   selectedObject,
 }: any) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 text-[11px]">
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
       {animationList.map(({ key, label, icon: Icon, color, hover }) => (
         <button
           key={key}
           onClick={() => applyAnimation(key)}
-          className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 ${color} ${hover}
+          className={`flex flex-col justify-center items-center gap-1 w-full min-h-[48px] rounded-lg font-medium transition-transform hover:scale-105 ${color} ${hover}
             ${
               selectedObject?.animation === key
                 ? "ring-2 ring-white scale-105 shadow-lg"
                 : ""
             }`}
         >
-          <Icon size={10} />
-          {label}
+          <Icon size={12} />
+          <span className="truncate">{label}</span>
         </button>
       ))}
     </div>
