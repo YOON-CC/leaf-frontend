@@ -377,24 +377,41 @@ export default function Editor() {
                                   el.style.position = 'fixed';
                                   el.style.top = 0;
                                   break;
-                                case 'stickyGently':
-                                  // sticky 동작 처리
-                                  const stickyTop = el.getBoundingClientRect().top + window.scrollY; // 원래 Y위치
-                                  const fixedTop = el.getBoundingClientRect().top; // 화면 내 Y위치
-                                  const fixedLeft = el.getBoundingClientRect().left; // 화면 내 X위치
-                                  const originalWidth = el.offsetWidth; // 고정 시 너비 유지
-                                  
+                                case 'stickyGently': {
+                                  const stickyTop = el.getBoundingClientRect().top + window.scrollY;
+                                  const fixedTop = el.getBoundingClientRect().top;
+                                  const fixedLeft = el.getBoundingClientRect().left;
+                                  const originalWidth = el.offsetWidth;
+
                                   window.addEventListener('scroll', () => {
-                                    // if (window.scrollY >= stickyTop) {
-                                    //   el.style.position = 'fixed';
-                                    //   el.style.top = fixedTop + 'px';
-                                    //   el.style.zIndex = '9999';
-                                    // } else {
-                                      el.style.top = window.scrollY + 'px';
-                                      console.log('현재 스크롤 Y:', window.scrollY);
-                                    // }
+                                    el.style.top = window.scrollY + 'px';
                                   });
                                   break;
+                                }
+                                case 'stickyLittle': {
+                                  const stickyTop = el.getBoundingClientRect().top + window.scrollY;
+                                  const fixedLeft = el.getBoundingClientRect().left;
+                                  const originalWidth = el.offsetWidth;
+
+                                  let move = 0; 
+
+                                  window.addEventListener('scroll', () => {
+                                    const scrollY = window.scrollY;
+                                    const offsetFromStart = scrollY - stickyTop;
+
+                                    if(move > 100) { // 이게 멈추는 트리게
+                                      console.log("11111")
+                                    } else  {
+                                      el.style.top = window.scrollY + 'px';
+                                      move += 1; // 스크롤할 때마다 1씩 증가
+                                      console.log(move)
+                                      
+                                    }
+                                  });
+
+                                  break;
+                                }
+
                               }
                             });
                           }, { threshold: 0.1 });
@@ -439,6 +456,8 @@ export default function Editor() {
                               case 'sticky':
                                 break;
                               case 'stickyGently':
+                                break;
+                              case 'stickyLittle':
                                 break;
                             }
                             // fadeIn, fadeOut이 아닌 경우에만 opacity를 1로 설정
@@ -1015,6 +1034,18 @@ export default function Editor() {
                     >
                       <Move size={10} />
                       sticky gently
+                    </button>
+                    <button
+                      onClick={() => applyAnimation("stickyLittle")}
+                      className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-gray-400 hover:bg-gray-300
+                        ${
+                          selectedObject?.animation === "stickyLittle"
+                            ? "ring-2 ring-white scale-105 shadow-lg"
+                            : ""
+                        }`}
+                    >
+                      <Move size={10} />
+                      sticky little
                     </button>
                   </div>
                 </div>
