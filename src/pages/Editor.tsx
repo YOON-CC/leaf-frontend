@@ -62,7 +62,15 @@ export default function Editor() {
     scaleX: 1,
     scaleY: 1,
   });
+
+  // canvas 배경색 설정
   const [canvasBackgroundColor, setCanvasBackgroundColor] = useState("#ffffff");
+  useEffect(() => {
+    if (!fabricCanvas.current) return;
+
+    fabricCanvas.current.backgroundColor = canvasBackgroundColor;
+    fabricCanvas.current.renderAll();
+  }, [canvasBackgroundColor]);
 
   // 충돌 중인지 저장하는 ref (렌더링과 무관하게 상태 저장용)
   const isIntersectingRef = useRef(false);
