@@ -40,6 +40,16 @@ import {
 } from "../utils/handlers/deleteSelectedObject";
 import { updateProperty } from "../utils/fabric/changeObjectProperty";
 import { useInitCanvas } from "../hooks/fabricEventHooks";
+import {
+  defaultShadowBlur,
+  defaultShadowColor,
+  defaultShadowOffset,
+  handleBlurChange,
+  handleColorChange,
+  handleShadowClick,
+  shadows,
+  syncShadowFromObject,
+} from "../utils/fabric/shadowUtils";
 interface TreeNode {
   id: string; // customId
   object: fabric.Object;
@@ -188,86 +198,17 @@ export default function Editor() {
   };
 
   // 그림자
-  const [shadowColor, setShadowColor] = useState("#000000");
-  const [shadowBlur, setShadowBlur] = useState(3);
-  const [shadowOffset, setShadowOffset] = useState({ x: 3, y: 3 }); // 기본값
-
-  const shadows = [
-    { name: "shadow 1", x: -4, y: -4 },
-    { name: "shadow 2", x: 0, y: -4 },
-    { name: "shadow 3", x: 4, y: -4 },
-    { name: "shadow 4", x: -4, y: 0 },
-    { name: "shadow 5", x: 0, y: 0 },
-    { name: "shadow 6", x: 4, y: 0 },
-    { name: "shadow 7", x: -4, y: 4 },
-    { name: "shadow 8", x: 0, y: 4 },
-    { name: "shadow 9", x: 4, y: 4 },
-  ];
-
-  // 그림자 속성 업데이트 함수
-  const applyShadow = (color: any, blur: any, offsetX: any, offsetY: any) => {
-    if (!selectedObject || !fabricCanvas.current) return;
-
-    const shadow = new fabric.Shadow({
-      color,
-      blur,
-      offsetX,
-      offsetY,
-    });
-
-    selectedObject.set("shadow", shadow);
-    fabricCanvas.current.renderAll();
-
-    setObjectProperties((prev) => ({
-      ...prev,
-      shadowColor: color,
-      shadowBlur: blur,
-      shadowOffsetX: offsetX,
-      shadowOffsetY: offsetY,
-    }));
-  };
-
-  // 컬러 혹은 블러 변경 시 기존 offset 유지하며 적용
-  const handleColorChange = (color: any) => {
-    setShadowColor(color);
-    applyShadow(color, shadowBlur, shadowOffset.x, shadowOffset.y);
-  };
-
-  const handleBlurChange = (blur: any) => {
-    setShadowBlur(blur);
-    applyShadow(shadowColor, blur, shadowOffset.x, shadowOffset.y);
-  };
-
-  // 버튼 클릭 시 offset 변경하며 적용
-  const handleShadowClick = (x: any, y: any) => {
-    setShadowOffset({ x, y });
-    applyShadow(shadowColor, shadowBlur, x, y);
-  };
-
+  const [shadowColor, setShadowColor] = useState(defaultShadowColor);
+  const [shadowBlur, setShadowBlur] = useState(defaultShadowBlur);
+  const [shadowOffset, setShadowOffset] = useState(defaultShadowOffset);
   useEffect(() => {
-    if (!selectedObject) {
-      setShadowColor("#000000");
-      setShadowBlur(0);
-      setShadowOffset({ x: 3, y: 3 });
-      return;
-    }
-
-    const shadow = selectedObject.shadow as fabric.Shadow | null;
-
-    if (shadow) {
-      setShadowColor(shadow.color ?? "#000000");
-      setShadowBlur(shadow.blur ?? 0);
-      setShadowOffset({
-        x: shadow.offsetX ?? 3,
-        y: shadow.offsetY ?? 3,
-      });
-    } else {
-      setShadowColor("#000000");
-      setShadowBlur(0);
-      setShadowOffset({ x: 3, y: 3 });
-    }
+    syncShadowFromObject(
+      selectedObject,
+      setShadowColor,
+      setShadowBlur,
+      setShadowOffset
+    );
   }, [selectedObject]);
-
   return (
     <div className="h-screen bg-[#1a1a1a] flex flex-col">
       {/* 상단 툴바 */}
@@ -824,6 +765,7 @@ export default function Editor() {
                       />
                     </div>
                   )}
+
                 {/* Opacity */}
                 {selectedObject.shapeType !== "text" &&
                   selectedObject.shapeType !== "layout" && (
@@ -865,19 +807,35 @@ export default function Editor() {
                         <input
                           type="color"
                           value={shadowColor}
-                          onChange={(e) => handleColorChange(e.target.value)}
-                          className="ml-1 align-middle"
+                          onChange={(e) =>
+                            handleColorChange(
+                              e.target.value,
+                              shadowBlur,
+                              shadowOffset,
+                              selectedObject,
+                              fabricCanvas.current,
+                              setShadowColor,
+                              setObjectProperties
+                            )
+                          }
                         />
                         <label className="flex items-center gap-2">
                           Blur:
                           <input
                             type="range"
                             min={0}
-                            max={20}
-                            step={1}
+                            max={50}
                             value={shadowBlur}
                             onChange={(e) =>
-                              handleBlurChange(parseInt(e.target.value))
+                              handleBlurChange(
+                                Number(e.target.value),
+                                shadowColor,
+                                shadowOffset,
+                                selectedObject,
+                                fabricCanvas.current,
+                                setShadowBlur,
+                                setObjectProperties
+                              )
                             }
                           />
                           <span className="w-6 text-right">{shadowBlur}px</span>
@@ -885,23 +843,40 @@ export default function Editor() {
                       </div>
 
                       {/* 그림자 offset 버튼들 */}
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[13px] text-white cursor-pointer">
-                        {shadows.map(({ name, x, y }, idx) => (
-                          <div
-                            key={idx}
-                            onClick={() => handleShadowClick(x, y)}
-                            className={`flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 ${
-                              shadowOffset.x === x && shadowOffset.y === y
-                                ? "bg-[#259478]"
-                                : "bg-[#303030] hover:bg-[#252525]"
-                            }`}
-                            style={{
-                              boxShadow: `${x}px ${y}px ${shadowBlur}px ${shadowColor}`,
-                            }}
-                          >
-                            {name}
-                          </div>
-                        ))}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
+                        {shadows.map((s) => {
+                          const isActive =
+                            shadowOffset.x === s.x && shadowOffset.y === s.y;
+                          return (
+                            <button
+                              key={s.name}
+                              onClick={() =>
+                                handleShadowClick(
+                                  s.x,
+                                  s.y,
+                                  shadowColor,
+                                  shadowBlur,
+                                  selectedObject,
+                                  fabricCanvas.current,
+                                  setShadowOffset,
+                                  setObjectProperties
+                                )
+                              }
+                              className={`flex justify-center items-center h-[40px] rounded-lg font-medium transition-all transform hover:scale-105
+                                ${
+                                  isActive
+                                    ? "bg-[#259478] text-white"
+                                    : "bg-[#303030] text-gray-300 hover:bg-[#252525]"
+                                }
+                              `}
+                              style={{
+                                boxShadow: `${s.x}px ${s.y}px ${shadowBlur}px ${shadowColor}`,
+                              }}
+                            >
+                              {s.name}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
