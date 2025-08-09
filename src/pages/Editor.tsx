@@ -562,17 +562,6 @@ export default function Editor() {
                   Basic Shapes
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
-                  {/* <button
-                    onClick={() => addShape("circle")}
-                    className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
-                  >
-                    <Circle
-                      size={20}
-                      className="text-blue-400 group-hover:text-blue-300"
-                    />
-                    <span className="text-xs text-gray-300">Circle</span>
-                  </button> */}
-
                   <button
                     onClick={() => addShape("rectangle")}
                     className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
@@ -583,17 +572,6 @@ export default function Editor() {
                     />
                     <span className="text-xs text-gray-300">Rectangle</span>
                   </button>
-
-                  {/* <button
-                    onClick={() => addShape("triangle")}
-                    className="p-3 bg-[#303030] hover:bg-[#252525] rounded-lg transition-colors flex flex-col items-center space-y-1 group"
-                  >
-                    <Triangle
-                      size={20}
-                      className="text-green-400 group-hover:text-green-300"
-                    />
-                    <span className="text-xs text-gray-300">Triangle</span>
-                  </button> */}
 
                   <button
                     onClick={() => addShape("text")}
@@ -630,16 +608,6 @@ export default function Editor() {
 
                 <div className="text-sm">
                   <div className="text-sm">
-                    {/* <RenderTree
-                      nodes = [...tree, ...unlinkedNodes]
-                      setDraggedNodeId,
-                      dragOverNodeId,
-                      draggedNodeId,
-                      setTree,
-                      unlinkedNodes,
-                      setDragOverNodeId,
-                      // getIcon,
-                      /> */}
                     <RenderTree
                       tree={tree}
                       setTree={setTree}
