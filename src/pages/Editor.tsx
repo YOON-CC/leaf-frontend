@@ -61,6 +61,7 @@ export default function Editor() {
     angle: 0,
     scaleX: 1,
     scaleY: 1,
+    fontSize: 16,
   });
 
   // canvas 배경색 설정
@@ -676,201 +677,218 @@ export default function Editor() {
                 </div>
 
                 {/* Fill */}
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-300">
-                    Fill
-                  </label>
-                  <div className="flex items-center space-x-2">
+                {selectedObject.shapeType !== "layout" && (
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-gray-300">
+                      Fill
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="color"
+                        value={objectProperties.fill}
+                        onChange={(e) =>
+                          handlePropertyChange("fill", e.target.value)
+                        }
+                        className="w-10 h-10 rounded-lg border border-gray-600 bg-[#303030]"
+                      />
+                      <input
+                        type="text"
+                        value={objectProperties.fill}
+                        onChange={(e) =>
+                          handlePropertyChange("fill", e.target.value)
+                        }
+                        className="flex-1 px-3 py-2 bg-[#303030] border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#28e0b2]"
+                      />
+                    </div>
+                  </div>
+                )}
+                {/* 텍스트 처리 */}
+                {selectedObject.shapeType === "text" && (
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-gray-300">
+                      Text Size
+                    </label>
                     <input
-                      type="color"
-                      value={objectProperties.fill}
-                      onChange={(e) =>
-                        handlePropertyChange("fill", e.target.value)
-                      }
-                      className="w-10 h-10 rounded-lg border border-gray-600 bg-[#303030]"
-                    />
-                    <input
-                      type="text"
-                      value={objectProperties.fill}
-                      onChange={(e) =>
-                        handlePropertyChange("fill", e.target.value)
-                      }
-                      className="flex-1 px-3 py-2 bg-[#303030] border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#28e0b2]"
+                      type="number"
+                      min={1}
+                      max={200}
+                      value={
+                        objectProperties.fontSize ||
+                        selectedObject.fontSize ||
+                        16
+                      } // 기본값 16
+                      onChange={(e) => {
+                        const newSize = parseInt(e.target.value, 10);
+                        handlePropertyChange("fontSize", newSize);
+
+                        if (selectedObject) {
+                          selectedObject.set("fontSize", newSize);
+                          selectedObject.canvas?.renderAll();
+                        }
+                      }}
+                      className="w-full px-3 py-2 bg-[#303030] border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#28e0b2]"
                     />
                   </div>
-                </div>
+                )}
 
                 {/* Stroke */}
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-300">
-                    Stroke
-                  </label>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="color"
-                      value={objectProperties.stroke || "#000000"}
-                      onChange={(e) =>
-                        handlePropertyChange("stroke", e.target.value)
-                      }
-                      className="w-10 h-10 rounded-lg border border-gray-600 bg-[#303030]"
-                    />
-                    <input
-                      type="text"
-                      value={objectProperties.stroke}
-                      onChange={(e) =>
-                        handlePropertyChange("stroke", e.target.value)
-                      }
-                      className="flex-1 px-3 py-2 bg-[#303030] border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#28e0b2]"
-                    />
-                  </div>
+                {selectedObject.shapeType !== "text" &&
+                  selectedObject.shapeType !== "layout" && (
+                    <div className="space-y-3">
+                      <label className="block text-sm font-medium text-gray-300">
+                        Stroke
+                      </label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="color"
+                          value={objectProperties.stroke || "#000000"}
+                          onChange={(e) =>
+                            handlePropertyChange("stroke", e.target.value)
+                          }
+                          className="w-10 h-10 rounded-lg border border-gray-600 bg-[#303030]"
+                        />
+                        <input
+                          type="text"
+                          value={objectProperties.stroke}
+                          onChange={(e) =>
+                            handlePropertyChange("stroke", e.target.value)
+                          }
+                          className="flex-1 px-3 py-2 bg-[#303030] border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#28e0b2]"
+                        />
+                      </div>
 
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-400">Width</span>
-                      <span className="text-sm text-gray-300">
-                        {objectProperties.strokeWidth}px
-                      </span>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-400">Width</span>
+                          <span className="text-sm text-gray-300">
+                            {objectProperties.strokeWidth}px
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="10"
+                          value={objectProperties.strokeWidth}
+                          onChange={(e) =>
+                            handlePropertyChange(
+                              "strokeWidth",
+                              parseInt(e.target.value)
+                            )
+                          }
+                          className="w-full h-2 bg-[#303030] rounded-lg appearance-none cursor-pointer slider"
+                        />
+                      </div>
                     </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="10"
-                      value={objectProperties.strokeWidth}
-                      onChange={(e) =>
-                        handlePropertyChange(
-                          "strokeWidth",
-                          parseInt(e.target.value)
-                        )
-                      }
-                      className="w-full h-2 bg-[#303030] rounded-lg appearance-none cursor-pointer slider"
-                    />
-                  </div>
-                </div>
+                  )}
 
                 {/* Rounded */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-300">
-                      Rounded
-                    </span>
-                    <span className="text-sm text-gray-300">
-                      {selectedObject?.rx ?? 0}px
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="1"
-                    value={selectedObject?.rx ?? 0}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value);
-                      handlePropertyChange("rx", value);
-                      handlePropertyChange("ry", value); // 둥글기 대칭 적용
-                    }}
-                    className="w-full h-2 bg-[#303030] rounded-lg appearance-none cursor-pointer slider"
-                  />
-                </div>
-
-                {/* Opacity */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-300">
-                      Opacity
-                    </span>
-                    <span className="text-sm text-gray-300">
-                      {Math.round(objectProperties.opacity * 100)}%
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={objectProperties.opacity}
-                    onChange={(e) =>
-                      handlePropertyChange(
-                        "opacity",
-                        parseFloat(e.target.value)
-                      )
-                    }
-                    className="w-full h-2 bg-[#303030] rounded-lg appearance-none cursor-pointer slider"
-                  />
-                </div>
-
-                {/* Shadow */}
-                <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-gray-300">Shadow</h3>
-
-                  {/* 색상 & Blur 선택 */}
-                  <div className="flex items-center gap-4 text-white text-sm">
-                    <input
-                      type="color"
-                      value={shadowColor}
-                      onChange={(e) => handleColorChange(e.target.value)}
-                      className="ml-1 align-middle"
-                    />
-                    <label className="flex items-center gap-2">
-                      Blur:
+                {selectedObject.shapeType !== "text" &&
+                  selectedObject.shapeType !== "layout" && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-300">
+                          Rounded
+                        </span>
+                        <span className="text-sm text-gray-300">
+                          {selectedObject?.rx ?? 0}px
+                        </span>
+                      </div>
                       <input
                         type="range"
-                        min={0}
-                        max={20}
-                        step={1}
-                        value={shadowBlur}
-                        onChange={(e) =>
-                          handleBlurChange(parseInt(e.target.value))
-                        }
-                      />
-                      <span className="w-6 text-right">{shadowBlur}px</span>
-                    </label>
-                  </div>
-
-                  {/* 그림자 offset 버튼들 */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[13px] text-white cursor-pointer">
-                    {shadows.map(({ name, x, y }, idx) => (
-                      <div
-                        key={idx}
-                        onClick={() => handleShadowClick(x, y)}
-                        className={`flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 ${
-                          shadowOffset.x === x && shadowOffset.y === y
-                            ? "bg-[#259478]"
-                            : "bg-[#303030] hover:bg-[#252525]"
-                        }`}
-                        style={{
-                          boxShadow: `${x}px ${y}px ${shadowBlur}px ${shadowColor}`,
+                        min="0"
+                        max="100"
+                        step="1"
+                        value={selectedObject?.rx ?? 0}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value);
+                          handlePropertyChange("rx", value);
+                          handlePropertyChange("ry", value); // 둥글기 대칭 적용
                         }}
-                      >
-                        {name}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                {/* Transform */}
-                <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-gray-300">
-                    Transform
-                  </h3>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-400">Rotation</span>
-                      <span className="text-sm text-gray-300">
-                        {Math.round(objectProperties.angle)}°
-                      </span>
+                        className="w-full h-2 bg-[#303030] rounded-lg appearance-none cursor-pointer slider"
+                      />
                     </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="360"
-                      value={objectProperties.angle}
-                      onChange={(e) =>
-                        handlePropertyChange("angle", parseInt(e.target.value))
-                      }
-                      className="w-full h-2 bg-[#303030] rounded-lg appearance-none cursor-pointer slider"
-                    />
-                  </div>
-                </div>
+                  )}
+                {/* Opacity */}
+                {selectedObject.shapeType !== "text" &&
+                  selectedObject.shapeType !== "layout" && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-300">
+                          Opacity
+                        </span>
+                        <span className="text-sm text-gray-300">
+                          {Math.round(objectProperties.opacity * 100)}%
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.1"
+                        value={objectProperties.opacity}
+                        onChange={(e) =>
+                          handlePropertyChange(
+                            "opacity",
+                            parseFloat(e.target.value)
+                          )
+                        }
+                        className="w-full h-2 bg-[#303030] rounded-lg appearance-none cursor-pointer slider"
+                      />
+                    </div>
+                  )}
+                {/* Shadow */}
+                {selectedObject.shapeType !== "text" &&
+                  selectedObject.shapeType !== "layout" && (
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-medium text-gray-300">
+                        Shadow
+                      </h3>
+
+                      {/* 색상 & Blur 선택 */}
+                      <div className="flex items-center gap-4 text-white text-sm">
+                        <input
+                          type="color"
+                          value={shadowColor}
+                          onChange={(e) => handleColorChange(e.target.value)}
+                          className="ml-1 align-middle"
+                        />
+                        <label className="flex items-center gap-2">
+                          Blur:
+                          <input
+                            type="range"
+                            min={0}
+                            max={20}
+                            step={1}
+                            value={shadowBlur}
+                            onChange={(e) =>
+                              handleBlurChange(parseInt(e.target.value))
+                            }
+                          />
+                          <span className="w-6 text-right">{shadowBlur}px</span>
+                        </label>
+                      </div>
+
+                      {/* 그림자 offset 버튼들 */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[13px] text-white cursor-pointer">
+                        {shadows.map(({ name, x, y }, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => handleShadowClick(x, y)}
+                            className={`flex justify-center items-center px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 ${
+                              shadowOffset.x === x && shadowOffset.y === y
+                                ? "bg-[#259478]"
+                                : "bg-[#303030] hover:bg-[#252525]"
+                            }`}
+                            style={{
+                              boxShadow: `${x}px ${y}px ${shadowBlur}px ${shadowColor}`,
+                            }}
+                          >
+                            {name}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                 {/* Array */}
                 <div className="space-y-4">
