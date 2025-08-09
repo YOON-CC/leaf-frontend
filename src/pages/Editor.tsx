@@ -412,7 +412,31 @@ export default function Editor() {
                                   });
                                   break;
                                 }
+                                case 'stickyLater': {
+                                  const fixedLeft = el.getBoundingClientRect().left;
+                                  const originalWidth = el.offsetWidth;
 
+                                  const halfWindowHeight = window.innerHeight / 2;
+                                  let move = 0;
+                                  const elementOriginalTop = el.getBoundingClientRect().top;
+                                  window.addEventListener('scroll', () => {
+                                    // 요소의 화면 내 top 위치
+                                    const elementTop = el.getBoundingClientRect().top;
+                                  
+                                    if (elementTop < halfWindowHeight) {
+                                      if (move > 200) {
+                                        // 멈출 조건
+                                      } else {
+                                        console.log("시작", elementTop, halfWindowHeight, el.offsetHeight);
+                                        el.style.top = window.scrollY- elementOriginalTop + el.offsetHeight+ el.offsetHeight + 'px';
+                                        move += 1;
+                                        console.log(move);
+                                      }
+                                    }
+                                  });
+
+                                  break;
+                                }
                               }
                             });
                           }, { threshold: 0.1 });
@@ -459,6 +483,8 @@ export default function Editor() {
                               case 'stickyGently':
                                 break;
                               case 'stickyLittle':
+                                break;
+                              case 'stickyLater':
                                 break;
                             }
                             // fadeIn, fadeOut이 아닌 경우에만 opacity를 1로 설정
@@ -1047,6 +1073,18 @@ export default function Editor() {
                     >
                       <Move size={10} />
                       sticky little
+                    </button>
+                    <button
+                      onClick={() => applyAnimation("stickyLater")}
+                      className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-gray-400 hover:bg-gray-300
+                        ${
+                          selectedObject?.animation === "stickyLater"
+                            ? "ring-2 ring-white scale-105 shadow-lg"
+                            : ""
+                        }`}
+                    >
+                      <Move size={10} />
+                      sticky later
                     </button>
                   </div>
                 </div>
