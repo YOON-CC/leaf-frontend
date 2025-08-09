@@ -217,6 +217,17 @@ const generateTreeNodeCode = (
         margin-top: ${childrenTop}px;
         ${boxShadow}
       `;
+    } else if (object.shapeType === "text") {
+      const fontSize = (object.fontSize || 16) * ((scaleX + scaleY) / 2);
+      const color = object.fill || "#000000";
+      style = `
+      position: absolute;
+      margin-left: ${childrenLeft}px;
+      margin-top: ${childrenTop}px;
+      color: ${color};
+      font-size: ${fontSize}px;
+      white-space: nowrap;
+    `;
     } else if (object.shapeType === "layout") {
       style = `
         position: absolute;
@@ -260,7 +271,24 @@ const generateTreeNodeCode = (
       .join("\n");
     return [imgTag, childrenCode].join("\n");
   }
-
+  if (object.shapeType === "text") {
+    const textContent = object.text || "";
+    const divTag = `${indentSpace}<div id="${id}" style="${style}"${animationAttr}>${textContent}</div>`;
+    const childrenCode = (node.children || [])
+      .map((child) =>
+        generateTreeNodeCode(
+          child,
+          indent + 1,
+          left,
+          top,
+          scaleX,
+          scaleY,
+          imageData
+        )
+      )
+      .join("\n");
+    return [divTag, childrenCode].join("\n");
+  }
   // 일반 div 처리
   const divStart = `${indentSpace}<div id="${id}" style="${style}"${animationAttr}>`;
   const childrenCode = (node.children || [])
