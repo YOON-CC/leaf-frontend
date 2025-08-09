@@ -388,30 +388,6 @@ export default function Editor() {
                                   });
                                   break;
                                 }
-                                case 'stickyLittle': {
-                                  const stickyTop = el.getBoundingClientRect().top + window.scrollY;
-                                  const fixedLeft = el.getBoundingClientRect().left;
-                                  const originalWidth = el.offsetWidth;
-
-                                  const halfWindowHeight = window.innerHeight / 2;
-                                  let move = 0; 
-
-                                  window.addEventListener('scroll', () => {
-                                    const scrollY = window.scrollY;
-
-                                    if(scrollY < stickyTop + halfWindowHeight) {
-                                      if(move > 200) {
-                                      } else {
-                                        console.log("시작");
-
-                                        el.style.top = scrollY + 'px';
-                                        move += 1;
-                                        console.log(move);
-                                      }
-                                    }
-                                  });
-                                  break;
-                                }
                                 case 'stickyLater': {
                                   const fixedLeft = el.getBoundingClientRect().left;
                                   const originalWidth = el.offsetWidth;
@@ -426,12 +402,13 @@ export default function Editor() {
                                     
 
                                     if (elementTop < halfWindowHeight) {
-                                      if (move > 200) {
+                                      if (move > 100) {
                                         // 멈출 조건
 
                                       } 
                                       else if(startTop < halfWindowHeight + el.offsetHeight/2){
                                         el.style.top = scrollY + 'px';
+                                        move+=1;
                                       }
                                       else {
                                         console.log("시작", elementTop, window.scrollY, halfWindowHeight, el.offsetHeight);
@@ -491,8 +468,6 @@ export default function Editor() {
                               case 'sticky':
                                 break;
                               case 'stickyGently':
-                                break;
-                              case 'stickyLittle':
                                 break;
                               case 'stickyLater':
                                 break;
@@ -1071,18 +1046,6 @@ export default function Editor() {
                     >
                       <Move size={10} />
                       sticky gently
-                    </button>
-                    <button
-                      onClick={() => applyAnimation("stickyLittle")}
-                      className={`flex justify-center items-center gap-1 px-2 h-[40px] rounded-lg font-medium transition transform hover:scale-105 bg-gray-400 hover:bg-gray-300
-                        ${
-                          selectedObject?.animation === "stickyLittle"
-                            ? "ring-2 ring-white scale-105 shadow-lg"
-                            : ""
-                        }`}
-                    >
-                      <Move size={10} />
-                      sticky little
                     </button>
                     <button
                       onClick={() => applyAnimation("stickyLater")}
