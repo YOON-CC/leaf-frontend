@@ -401,10 +401,8 @@ export default function Editor() {
                                     console.log("오리지널 탑",startTop)
                                     
 
-                                    if (elementTop < halfWindowHeight) {
                                       if (move > 100) {
-                                        // 멈출 조건
-
+                                        return;
                                       } 
                                       else if(startTop < halfWindowHeight + el.offsetHeight/2){
                                         el.style.top = scrollY + 'px';
@@ -419,7 +417,6 @@ export default function Editor() {
                                         move += 1;
                                         console.log(move);
                                       }
-                                    }
                                   });
 
                                   break;
