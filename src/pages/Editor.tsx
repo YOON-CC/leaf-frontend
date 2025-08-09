@@ -426,7 +426,7 @@ export default function Editor() {
           </div>
 
           {/* 캔버스 */}
-          <div className="flex-1 flex items-center justify-center bg-[#1a1a1a] p-4 sm:p-6 lg:p-8 overflow-auto">
+          <div className="flex-1 flex items-center justify-center bg-[#1a1a1a]  overflow-auto">
             <div className="bg-white shadow-2xl max-h-[calc(100vh-200px)] max-w-[calc(100vw-40px)] sm:max-w-[calc(100vw-80px)] lg:max-w-[90%] overflow-auto">
               <canvas
                 ref={canvasRef}
@@ -438,7 +438,7 @@ export default function Editor() {
         </div>
 
         {/* 오른쪽 속성 패널 */}
-        <div className="w-80 bg-[#1a1a1a] border-l border-[#000000] flex flex-col max-h-[calc(100vh-50px)] overflow-auto">
+        <div className="w-80 bg-[#1a1a1a] border-l border-[#000000] flex flex-col max-h-[calc(100vh-60px)] overflow-auto">
           <div className="p-4 border-b border-[#000000]">
             <h2 className="text-lg font-semibold text-white">Properties</h2>
           </div>
