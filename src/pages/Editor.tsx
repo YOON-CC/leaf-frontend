@@ -644,8 +644,8 @@ export default function Editor() {
         </div>
 
         {/* 중앙 캔버스 영역 */}
-        <div className="flex-1 flex items-center justify-center bg-[#1a1a1a] p-8">
-          <div className="bg-white shadow-xl">
+        <div className="flex-1 flex items-center justify-center bg-[#1a1a1a] p-8 ">
+          <div className="bg-white shadow-xl max-h-[calc(100vh-150px)] overflow-auto">
             <canvas
               ref={canvasRef}
               style={{ boxShadow: "0 0 0 1px rgba(0,0,0,0.1)" }}
@@ -654,7 +654,7 @@ export default function Editor() {
         </div>
 
         {/* 오른쪽 속성 패널 */}
-        <div className="w-80 bg-[#1a1a1a] border-l border-[#000000] flex flex-col">
+        <div className="w-80 bg-[#1a1a1a] border-l border-[#000000] flex flex-col max-h-[calc(100vh-50px)] overflow-auto">
           <div className="p-4 border-b border-[#000000]">
             <h2 className="text-lg font-semibold text-white">Properties</h2>
           </div>
