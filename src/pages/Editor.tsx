@@ -393,22 +393,23 @@ export default function Editor() {
                                   const fixedLeft = el.getBoundingClientRect().left;
                                   const originalWidth = el.offsetWidth;
 
+                                  const halfWindowHeight = window.innerHeight / 2;
                                   let move = 0; 
 
                                   window.addEventListener('scroll', () => {
                                     const scrollY = window.scrollY;
-                                    const offsetFromStart = scrollY - stickyTop;
 
-                                    if(move > 100) { // 이게 멈추는 트리게
-                                      console.log("11111")
-                                    } else  {
-                                      el.style.top = window.scrollY + 'px';
-                                      move += 1; // 스크롤할 때마다 1씩 증가
-                                      console.log(move)
-                                      
+                                    if(scrollY < stickyTop + halfWindowHeight) {
+                                      if(move > 200) {
+                                      } else {
+                                        console.log("시작");
+
+                                        el.style.top = scrollY + 'px';
+                                        move += 1;
+                                        console.log(move);
+                                      }
                                     }
                                   });
-
                                   break;
                                 }
 
