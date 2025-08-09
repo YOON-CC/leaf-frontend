@@ -428,13 +428,17 @@ export default function Editor() {
                                     if (elementTop < halfWindowHeight) {
                                       if (move > 200) {
                                         // 멈출 조건
+
                                       } 
                                       else if(startTop < halfWindowHeight + el.offsetHeight/2){
                                         el.style.top = scrollY + 'px';
                                       }
                                       else {
                                         console.log("시작", elementTop, window.scrollY, halfWindowHeight, el.offsetHeight);
-                                        el.style.top = window.scrollY- elementOriginalTop + el.offsetHeight/2 + 'px';
+
+                                        const newTop = window.scrollY - elementOriginalTop + el.offsetHeight / 2;
+                                        el.style.top = (newTop > 0 ? newTop : 0) + 'px';
+
                                         move += 1;
                                         console.log(move);
                                       }
