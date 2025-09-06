@@ -1,69 +1,31 @@
-# React + TypeScript + Vite
+# 🌿 Leaf
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Leaf**는 **개발 지식이 없는 사람도 쉽게 활용할 수 있는 논코딩 툴(No-Code Tool)** 입니다.  
+코드를 직접 작성하지 않고도 다양한 기능을 직관적으로 구현할 수 있도록 설계되었으며,  
+필요 시에는 실제 코드로 내보내어 활용할 수도 있습니다.
 
-Currently, two official plugins are available:
+🔗 **배포 주소**: [https://leaf-frontend.vercel.app/](https://leaf-frontend.vercel.app/)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## About
 
-## Expanding the ESLint configuration
+Leaf는 이전 프로젝트인 **[DM-DreamMaker](https://github.com/YOON-CC/DM-DreamMaker)** 의 개선된 버전입니다.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+자세한 소개와 기획 의도는 블로그 포스트를 참고 ☞ [About Leaf](https://www.dev-chan.site/post/68a19b4f0017df121537123a)
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Features
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- **논코딩 인터페이스** – 코드 작성 없이 손쉽게 기능 구현
+- **코드 내보내기 지원** – 구현한 기능을 코드로 변환하여 활용 가능
+- **개선된 성능 & 안정성** – React Element의 재귀적 트리 구조를 통한 계층 관계 구현
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Development Setup
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+로컬 환경에서 실행
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# 1. 패키지 설치
+npm install
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 2. 개발 서버 실행
+npm run dev
 ```
