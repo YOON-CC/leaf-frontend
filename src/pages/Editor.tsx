@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
 import { Move, Trash2, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
 import { createShape } from "../utils/fabric/createShape";
