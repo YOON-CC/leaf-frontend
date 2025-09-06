@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Menu, Palette, Save, Download, ChevronLeft } from "lucide-react";
+import { Menu, Palette, Download, ChevronLeft } from "lucide-react";
 
 export default function Header({
   exportCanvas,
