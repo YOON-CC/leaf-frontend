@@ -84,11 +84,16 @@ function exportAnimationScript() {
 
             el.dataset.animated = 'true';
             
-            // fadeIn, fadeOut의 경우 2초, 나머지는 0.8초
-            if (animation === 'fadeIn' || animation === 'fadeOut') {
-            el.style.transition = 'opacity 2s ease';
-            } else {
-            el.style.transition = 'all 0.8s ease';
+            // sticky 관련 애니메이션은 transition을 적용하지 않음
+            const isStickyAnimation = ['sticky', 'stickyGently', 'stickyLater'].includes(animation);
+            
+            if (!isStickyAnimation) {
+                // fadeIn, fadeOut의 경우 2초, 나머지는 0.8초
+                if (animation === 'fadeIn' || animation === 'fadeOut') {
+                    el.style.transition = 'opacity 2s ease';
+                } else {
+                    el.style.transition = 'all 0.8s ease';
+                }
             }
 
             switch (animation) {
@@ -114,10 +119,14 @@ function exportAnimationScript() {
                 el.style.opacity = '1';
                 break;
             case 'sticky':
+                // 깜빡임 방지: 즉시 opacity를 1로 설정하고 position 변경
+                el.style.opacity = '1';
                 el.style.position = 'fixed';
-                el.style.top = 0;
+                el.style.top = '0px';
                 break;
             case 'stickyGently': {
+                // 깜빡임 방지: 즉시 opacity를 1로 설정
+                el.style.opacity = '1';
                 const stickyTop = el.getBoundingClientRect().top + window.scrollY;
                 const fixedTop = el.getBoundingClientRect().top;
                 const fixedLeft = el.getBoundingClientRect().left;
@@ -129,6 +138,8 @@ function exportAnimationScript() {
                 break;
             }
             case 'stickyLater': {
+                // 깜빡임 방지: 즉시 opacity를 1로 설정
+                el.style.opacity = '1';
                 const fixedLeft = el.getBoundingClientRect().left;
                 const originalWidth = el.offsetWidth;
                 const startTop = el.getBoundingClientRect().top;
@@ -168,8 +179,12 @@ function exportAnimationScript() {
         document.querySelectorAll('[data-animation]').forEach(el => {
         const animation = el.getAttribute('data-animation');
         
-        // fadeOut의 경우 초기값을 1로, fadeIn의 경우 0으로 설정
-        if (animation === 'fadeOut') {
+        // sticky 관련 애니메이션은 초기 opacity를 1로 설정 (깜빡임 방지)
+        const isStickyAnimation = ['sticky', 'stickyGently', 'stickyLater'].includes(animation);
+        
+        if (isStickyAnimation) {
+            el.style.opacity = '1';
+        } else if (animation === 'fadeOut') {
             el.style.opacity = '1';
         } else {
             el.style.opacity = '0';
@@ -196,21 +211,19 @@ function exportAnimationScript() {
             break;
             case 'fadeIn':
             // fadeIn의 경우 초기 opacity는 0으로 유지
-            // (이미 위에서 설정됨)
             break;
             case 'fadeOut':
             // fadeOut의 경우 초기 opacity는 1로 유지
-            // (이미 위에서 설정됨)
             break;
             case 'sticky':
-            break;
             case 'stickyGently':
-            break;
             case 'stickyLater':
+            // sticky 관련은 이미 위에서 opacity를 1로 설정했으므로 추가 처리 없음
             break;
         }
-        // fadeIn, fadeOut이 아닌 경우에만 opacity를 1로 설정
-        if (animation !== 'fadeIn' && animation !== 'fadeOut') {
+        
+        // sticky가 아닌 fadeIn, fadeOut이 아닌 경우에만 opacity를 재설정
+        if (!isStickyAnimation && animation !== 'fadeIn' && animation !== 'fadeOut') {
             el.style.opacity = '1';
         }
 

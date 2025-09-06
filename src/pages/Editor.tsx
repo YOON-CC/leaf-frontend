@@ -190,6 +190,7 @@ export default function Editor() {
       setShadowOffset
     );
   }, [selectedObject]);
+  console.log(tree);
 
   return (
     <div className="h-screen bg-[#1a1a1a] flex flex-col">

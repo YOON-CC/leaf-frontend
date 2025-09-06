@@ -30,10 +30,10 @@ export default function Header({
 
           {/* 액션 버튼들 - 모바일에서 숨김 */}
           <div className="hidden sm:flex items-center space-x-2">
-            <button className="ml-4 px-3 py-1.5 bg-[#28e0b2] text-white rounded-md hover:bg-[#259478] transition-colors text-sm flex items-center space-x-1">
+            {/* <button className="ml-4 px-3 py-1.5 bg-[#28e0b2] text-white rounded-md hover:bg-[#259478] transition-colors text-sm flex items-center space-x-1">
               <Save size={14} />
               <span className="hidden md:inline">Save</span>
-            </button>
+            </button> */}
             <button
               onClick={() =>
                 exportCanvas({
@@ -46,7 +46,7 @@ export default function Header({
                   setExportFile,
                 })
               }
-              className="px-3 py-1.5 bg-[#1a1a1a] text-gray-200 rounded-md hover:bg-[#252525] transition-colors text-sm flex items-center space-x-1"
+              className="ml-4 px-3 py-1.5 bg-[#28e0b2] text-white rounded-md hover:bg-[#259478] transition-colors text-sm flex items-center space-x-1"
             >
               <Download size={14} />
               <span className="hidden md:inline">Export</span>
@@ -57,11 +57,11 @@ export default function Header({
         <div className="flex items-center space-x-2 sm:space-x-3">
           {/* 모바일 액션 버튼들 */}
           <div className="flex sm:hidden items-center space-x-1">
-            <button className="p-2 bg-[#28e0b2] text-white rounded-md hover:bg-[#259478] transition-colors">
+            {/* <button className="p-2 bg-[#28e0b2] text-white rounded-md hover:bg-[#259478] transition-colors">
               <Save size={16} />
-            </button>
+            </button> */}
             <button
-              className="p-2 bg-[#1a1a1a] text-gray-200 rounded-md hover:bg-[#252525] transition-colors"
+              className="p-2 bg-[#28e0b2] text-white rounded-md hover:bg-[#259478] transition-colors"
               onClick={() =>
                 exportCanvas({
                   fabricCanvas,

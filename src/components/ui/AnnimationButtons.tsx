@@ -76,13 +76,6 @@ const animationList = [
     hover: "hover:bg-gray-700",
   },
   {
-    key: "stickyGently",
-    label: "sticky gently",
-    icon: Move,
-    color: "bg-gray-600",
-    hover: "hover:bg-gray-500",
-  },
-  {
     key: "stickyLater",
     label: "sticky later",
     icon: Move,
